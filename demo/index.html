@@ -1,340 +1,37 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Sinapses</title>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
-<style>
-*{margin:0;box-sizing:border-box}body{background:linear-gradient(100deg,#060607,#151518 70%,#1b1b1f);color:#ECEAE4;font:16px/1.4 "Barlow Condensed",sans-serif;height:100vh;overflow:hidden;position:relative;letter-spacing:.02em;user-select:none}
-canvas{position:absolute;left:0;top:0;pointer-events:none;z-index:1}h1{position:absolute;left:40px;top:22px;font-size:20px;letter-spacing:.14em;text-transform:uppercase;z-index:3}.sub{position:absolute;left:40px;top:52px;color:#9d9da2;max-width:760px;z-index:3}
-.g{position:absolute;z-index:2;width:210px;height:96px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);backdrop-filter:blur(18px);padding:14px 16px;box-shadow:0 10px 28px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.07);font-weight:700;letter-spacing:.05em;text-transform:uppercase;font-size:19px;cursor:grab;touch-action:none}
-.g small{display:block;font-weight:400;color:#9d9da2;text-transform:none;letter-spacing:0;font-size:14px}.g:hover{border-color:rgba(255,255,255,.35)}.g.drag{z-index:4;cursor:grabbing;border-color:rgba(255,106,85,.7)}
-.panel{position:absolute;left:40px;right:40px;bottom:20px;display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start;z-index:3}.box{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:10px 14px}.box h2{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:#9d9da2;margin-bottom:6px}
-button,select{font:inherit;font-size:15px;color:#ECEAE4;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:2px 12px;cursor:pointer;margin:0 6px 6px 0}button.p{background:#ECEAE4;color:#08080A;border-color:#ECEAE4;font-weight:700}
-.leg{display:flex;gap:6px 14px;flex-wrap:wrap;max-width:520px;font-size:15px;color:#c4c2bc}.leg span{display:flex;align-items:center;gap:6px}.leg i{width:22px;height:3px;border-radius:2px;background:var(--c);filter:saturate(var(--sat,1))}#cap{position:absolute;right:40px;top:26px;width:380px;color:#c4c2bc;z-index:3}#cap b{color:#ECEAE4}
-.cfg{position:absolute;right:24px;top:150px;width:316px;z-index:6;background:rgba(17,17,20,.84);border:1px solid rgba(255,255,255,.12);border-radius:14px;box-shadow:0 18px 44px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.06);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
-.cfg header{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 7px 7px 16px;cursor:grab;touch-action:none;border-bottom:1px solid rgba(255,255,255,.08)}.cfg.min header{border-bottom-color:transparent}.cfg.drag header{cursor:grabbing}
-.cfg h2{font-size:14px;font-weight:700;letter-spacing:.16em;text-transform:uppercase}
-.cfg .ic{display:grid;place-items:center;width:30px;height:30px;padding:0;margin:0;border-radius:8px;background:transparent;border:1px solid transparent;color:#c4c2bc}.cfg .ic:hover{background:rgba(255,255,255,.07);color:#ECEAE4}
-.cfg .ic svg{transition:transform .28s cubic-bezier(.2,.8,.2,1)}.cfg.min .ic svg{transform:rotate(180deg)}
-.cfgB{padding:0 16px 14px;max-height:calc(100vh - 210px);overflow:auto;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.18) transparent}.cfg.min .cfgB{display:none}
-.cfg section{padding:7px 0 3px}.cfg section+section{border-top:1px solid rgba(255,255,255,.07)}
-.cfg h3{font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:#9d9da2;margin-bottom:2px}
-.cfg .row{display:grid;grid-template-columns:92px 1fr 50px;align-items:center;column-gap:10px;padding:1px 0}.cfg .row.two{grid-template-columns:1fr auto;padding:5px 0}
-.cfg label,.cfg .row>span{grid-column:1;grid-row:1;font-size:16px;color:#dedcd6;white-space:nowrap}
-.cfg output{grid-column:3;grid-row:1;font-size:15px;font-variant-numeric:tabular-nums;color:#9d9da2;text-align:right;white-space:nowrap;transition:color .2s}.cfg .row.mod output{color:#FF8A78}
-.cfg small{grid-column:1/-1;font-size:13px;color:#8f8f95;line-height:1.3;margin:-1px 0 3px;letter-spacing:.01em}
-.cfg input[type=range]{grid-column:2;grid-row:1;-webkit-appearance:none;appearance:none;width:100%;min-width:0;height:22px;margin:0;background:transparent;cursor:pointer;--p:50%}
-.cfg input[type=range]::-webkit-slider-runnable-track{height:3px;border-radius:2px;background:linear-gradient(90deg,#FF6A55 var(--p),rgba(255,255,255,.16) var(--p))}
-.cfg input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;margin-top:-5.5px;border-radius:50%;background:#ECEAE4;border:3px solid #FF6A55;box-shadow:0 2px 6px rgba(0,0,0,.5);transition:transform .15s,box-shadow .15s}
-.cfg input[type=range]:active::-webkit-slider-thumb{transform:scale(1.15)}
-.cfg input[type=range]::-moz-range-track{height:3px;border-radius:2px;background:rgba(255,255,255,.16)}.cfg input[type=range]::-moz-range-progress{height:3px;border-radius:2px;background:#FF6A55}
-.cfg input[type=range]::-moz-range-thumb{width:8px;height:8px;border-radius:50%;background:#ECEAE4;border:3px solid #FF6A55}
-.cfg input[type=range]:focus-visible{outline:none}.cfg input[type=range]:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 4px rgba(255,106,85,.38)}
-.cfg button:focus-visible{outline:2px solid #FF6A55;outline-offset:2px}
-.cfg [role=switch]{position:relative;width:38px;height:22px;padding:0;margin:0;border-radius:11px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);align-self:center;transition:background .2s,border-color .2s}
-.cfg [role=switch] i{position:absolute;left:3px;top:3px;width:14px;height:14px;border-radius:50%;background:#ECEAE4;transition:transform .22s cubic-bezier(.2,.8,.2,1)}
-.cfg [role=switch][aria-checked=true]{background:#FF6A55;border-color:#FF6A55}.cfg [role=switch][aria-checked=true] i{transform:translateX(16px)}
-.cfg .seg{display:flex;border:1px solid rgba(255,255,255,.2);border-radius:8px;overflow:hidden;align-self:center}
-.cfg .seg button{margin:0;border:0;border-radius:0;padding:2px 9px;font-size:15px;background:transparent;font-variant-numeric:tabular-nums}.cfg .seg button+button{border-left:1px solid rgba(255,255,255,.12)}
-.cfg .seg button:hover{background:rgba(255,255,255,.08)}.cfg .seg button[aria-checked=true]{background:#ECEAE4;color:#08080A;font-weight:700}.cfg .seg button:focus-visible{outline-offset:-2px}
-.cfg footer{border-top:1px solid rgba(255,255,255,.07);padding-top:10px;margin-top:6px}
-.cfg .perf{margin-left:auto;font-size:14px;color:#9d9da2;font-variant-numeric:tabular-nums;white-space:nowrap}
-.cfg{color-scheme:dark}.cfg .act{display:flex;gap:8px}.cfg .act select{margin:0;flex:1.25;min-width:0;padding:4px 8px;border-radius:8px}.cfg .act select:hover{border-color:rgba(255,255,255,.45)}.cfg .act select:focus-visible{outline:2px solid #FF6A55;outline-offset:2px}.cfg select option{background:#17171a;color:#ECEAE4}.cfg .act button{margin:0;flex:1;padding:4px 8px}.cfg .act button:hover{border-color:rgba(255,255,255,.45)}.cfg .act button.p:hover{background:#fff}
-</style></head><body><h1>Sinapses</h1><p class="sub">Fitas contínuas, estados que se misturam sem salto e pontinhos rápidos nos pulsos. Cada fio tem a sua situação. Arraste um tile por cima da ligação de outro: o feixe desvia até o último instante; se o tile cobre o ponto de chegada, os fios se agarram a ele e depois soltam.</p><div id="cap"></div>
-<canvas id="cv"></canvas>
-<div class="g" id="api" style="left:90px;top:200px">API<small>gateway</small></div><div class="g" id="worker" style="left:470px;top:390px">Worker<small>1.9 → 2.0</small></div>
-<div class="g" id="chat" style="left:870px;top:190px">Chat<small>no ar</small></div><div class="g" id="db" style="left:870px;top:420px">Banco<small>3 bases</small></div>
-<div class="panel"><div class="box"><h2>Ligação</h2><select id="tg"></select><br><button class="p" data-a="on">Ligar</button><button class="p" data-a="off">Desligar</button><button class="p" data-a="test">Testar</button><button class="p" data-a="upd">Atualizar</button><button class="p" data-a="anom">Anomalia</button><button data-a="busy">Operação</button><button data-a="flow">Em uso</button><button data-a="break">Quebrar</button><button data-a="block">Bloquear</button><button data-a="idle">Repouso</button></div>
-<div class="box"><h2>Cenário completo</h2><button class="p" data-a="restart">Reiniciar worker</button></div><div class="box"><h2>Cores</h2><div class="leg" id="leg"></div></div></div>
-<aside class="cfg" id="cfg" aria-labelledby="cfgT"><header id="cfgH"><h2 id="cfgT">Ajustes dos fios</h2><span class="perf" id="perf" title="Custo de cada quadro (física e desenho) e quadros desenhados por segundo: 60 em uso, 30 em repouso total">…</span><button type="button" class="ic" id="cfgMin" aria-expanded="true" aria-controls="cfgB" aria-label="Recolher ajustes"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M4 10l4-4 4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></header><div class="cfgB" id="cfgB"></div></aside>
-<script>
-const TAU=Math.PI*2,clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x)),eo=t=>1-Math.pow(1-t,3),eio=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2,sm=t=>t*t*(3-2*t),fr=x=>x-Math.floor(x),lerp=(a,b,t)=>a+(b-a)*t;
-const mb=a=>()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
-const COL={idle:['Repouso','#59C37A'],flow:['Em uso','#4FD1E8'],busy:['Operação','#F2C94C'],testing:['Testando','#7C8CFF'],updating:['Atualizando','#E879F9'],anomaly:['Anomalia','#C6F432'],unfurl:['Ligando','#3DDC84'],retract:['Desligando','#FF9F43'],broken:['Quebrada','#FF4B4B'],blocked:['Bloqueada','#8D8D92'],off:['Desligada','#6F6F76']};
-const CAP={updating:'<b>Atualizando</b>: tentáculos finos saem do fluxo, se contorcem, se ramificam na ponta e voltam; esporos se soltam e somem.',anomaly:'<b>Anomalia</b>: os fios doentes (limão) se esticam até fios saudáveis, se prendem a eles e o contágio se espalha no ponto de contato; depois soltam. Pontos anômalos brotam ramificações.',idle:'<b>Repouso</b>: feixe calmo; um pontinho cruza de vez em quando.',flow:'<b>Em uso</b>: pontinhos rápidos e frequentes cruzam o feixe.',busy:'<b>Operação</b>: o feixe aperta e os pontinhos vêm em ondas, rápidos.',testing:'<b>Testando</b>: só alguns fios testam; lançam tentáculos que se ramificam em vários níveis para sondar e depois recolhem.',unfurl:'<b>Ligando</b>: os fios crescem dos dois tiles, se encontram e uma ondulação suave percorre o feixe.',retract:'<b>Desligando</b>: o fio afina num ponto, se solta e cada metade recolhe pairando.',broken:'<b>Quebrada</b>: a maioria dos fios afina e se rompe; as pontas soltas seguem o caminho do feixe e tentam se reencontrar: quase encostam, faíscam e recuam. Poucos continuam ligados, falhando, e os pulsos de cada lado tentam se encontrar.',blocked:'<b>Bloqueada</b>: feixe cinza; pulsos vermelhos se dispersam em faíscas antes do cadeado.',off:'<b>Desligada</b>: só um traço fantasma entre os tiles.'};
-const rgb=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));// saturação do painel aplicada em toda cor desenhada no canvas: mantém a luminância e afasta (ou aproxima) cada canal do cinza
-const rg=(c,a)=>{const k=CFG.sat;if(k===1)return`rgba(${c[0]|0},${c[1]|0},${c[2]|0},${a})`;const L=.2126*c[0]+.7152*c[1]+.0722*c[2],f=v=>Math.max(0,Math.min(255,L+(v-L)*k))|0;return`rgba(${f(c[0])},${f(c[1])},${f(c[2])},${a})`};
-// envelope da abertura do feixe: fechado junto aos tiles até CFG.ops (fração do caminho), depois abre até o máximo no meio
-const openEnv=u=>{const a=CFG.ops,w=Math.max(.06,Math.min(.42,.5-a));return sm(clamp((u-a)/w))*sm(clamp((1-u-a)/w))};const lite=(c,k)=>c.map(v=>Math.round(v+(255-v)*k));
-const cv=document.getElementById('cv'),ctx=cv.getContext('2d');let DPR=2;function size(){DPR=Math.max(2,Math.min(3,devicePixelRatio||1));cv.width=innerWidth*DPR;cv.height=innerHeight*DPR;cv.style.width=innerWidth+'px';cv.style.height=innerHeight+'px'}
-// ---- ajustes ao vivo: cada controle do painel é um multiplicador lido pela física e pelo desenho a cada quadro ----
-// padrão escolhido no painel de ajustes
-const CFG_DEF={pspd:2,pfrq:1.6,pdot:1,nmul:2.5,wid:1.6,spr:.7,ops:.1,glo:1.1,sat:1.75,life:2.5,wav:.8,wln:3,sway:1.1,tdl:1.6,avd:true,np:48},CFG={...CFG_DEF};
-try{const sv=JSON.parse(localStorage.getItem('sinapses-cfg')||'null');if(sv)for(const k in CFG_DEF)if(typeof sv[k]===typeof CFG_DEF[k])CFG[k]=sv[k];if(![24,36,48,64].includes(CFG.np))CFG.np=48}catch(e){}
-const nOf=n0=>Math.max(2,Math.round(n0*CFG.nmul));
-let NP=CFG.np;
-// parâmetros por estado; cada conexão os aproxima de forma exponencial, sem saltos
-const PR={updating:{ks:.06,nz:.05,dmp:.95,tr:.9,pc:1.7,n:2,am:.6},anomaly:{ks:.07,nz:.1,dmp:.94,tr:.6,pc:.9,n:3,am:.78},idle:{ks:.05,nz:.07,dmp:.955,tr:1.7,pc:6,n:1,am:.5},flow:{ks:.055,nz:.06,dmp:.957,tr:1.0,pc:2.4,n:2,am:.5},busy:{ks:.09,nz:.02,dmp:.94,tr:.7,pc:1.1,n:3,am:.8},testing:{ks:.05,nz:.07,dmp:.955,tr:1.2,pc:3.4,n:1,am:.5},
- unfurl:{ks:.05,nz:.07,dmp:.955,tr:1.5,pc:4,n:0,am:.5},retract:{ks:.04,nz:.06,dmp:.95,tr:1.5,pc:4,n:0,am:.5},broken:{ks:.045,nz:.12,dmp:.95,tr:1.5,pc:2.2,n:2,am:.9},blocked:{ks:.2,nz:0,dmp:.9,tr:1.4,pc:2.6,n:1,am:.32},off:{ks:.2,nz:0,dmp:.9,tr:1.5,pc:4,n:0,am:0}};
-const DEFS=[['api-worker','api','worker',9,1.15,5,'flow'],['worker-db','worker','db',7,1.15,9,'idle'],['chat-api','chat','api',8,1.15,13,'flow'],['worker-chat','worker','chat',6,1.15,21,'idle']];
-function mk([id,a,b,n0,sp,seed,st]){const R=mb(seed),n=nOf(n0),c={base:['idle','flow','busy'].includes(st)?st:'flow',hc:rgb(COL[['idle','flow','busy'].includes(st)?st:'flow'][1]),mv:0,pA:null,pB:null,dvAct:0,dv:new Float32Array(97),ob:{},nx:0,ny:1,id,a,b,n,n0,seed,sp,st,prev:st,t0:-99,sync:R(),strands:[],...PR[st],col:rgb(COL[st][1]),dw:[0,0,0].map((_,i)=>i<PR[st].n?1:0),syn:0,blk:st==='blocked'?1:0,ghost:st==='off'?1:0,dim:1,hi:0,clk:R()*10,ns:n};mkS(c);return c}
-// fios de uma ligação: a mesma semente gera os mesmos fios para a mesma quantidade (o painel recria só o que mudou)
-function mkS(c){const R=mb(c.seed);R();R();const{ns:n,seed}=c,sp=c.sp*Math.pow(c.n0/n,.6);c.strands=[];
- for(let i=0;i<n;i++)c.strands.push({i,a:(i-(n-1)/2)*sp*3.8,off:(i-(n-1)/2)*sp,w:.7+R()*.6,ph:[R()*TAU,R()*TAU,R()*TAU,R()*TAU],om:[.3+R()*.25,.6+R()*.4,.25+R()*.25,.3+R()*.3],rate:.85+R()*.4,pph:R(),dly:R()*1.3,cutF:.32+R()*.36,stf:.55+R()*.9,rs:.8+R()*.45,wf:[.3+R()*.5,.55+R()*.7],wk:[.8+R()*1.6,1.5+R()*2],wa:.6+R()*.9,fd:.982+R()*.012,rec:.6+R()*.8,probe:R()<.45,pp:R()*3,al:.55+R()*.4,side:R()<.5?1:-1,rip:-99,met:0,keep:(()=>{const kc=n>=12?3:2;for(let j=0;j<kc;j++)if(Math.floor((j+.3)*n/kc)===i)return true;return false})(),sk:1,inf:[],cc:c,td:[],nxt:0,upd:R()<.4,rnd:mb(seed*131+i+7),init:false,cut:-1,contract:0,x:[],y:[],px:[],py:[],alive:[],ax:new Float64Array(NP),ay:new Float64Array(NP),bx:new Float64Array(NP),by:new Float64Array(NP),dx:new Float64Array(NP),dy:new Float64Array(NP),A:null,B:null})}
-const C=DEFS.map(mk);
-function attach(r,to,off){const cx=r.left+r.width/2,cy=r.top+r.height/2,dx=to[0]-cx,dy=to[1]-cy,tx=(r.width/2)/Math.abs(dx||1e-9),ty=(r.height/2)/Math.abs(dy||1e-9),t=Math.min(tx,ty);let bx=cx+dx*t,by=cy+dy*t,nx,ny,tx_,ty_;
- if(tx<ty){nx=dx>0?1:-1;ny=0;tx_=0;ty_=1}else{nx=0;ny=dy>0?1:-1;tx_=1;ty_=0}
- const half=(tx<ty?r.height:r.width)/2-14,o=clamp(off,-half,half);return{x:bx+tx_*o,y:by+ty_*o,nx,ny,tx:tx_,ty:ty_}}
-function ease(c,dt){const t=PR[c.st],k=1-Math.exp(-dt*3.2),E=r=>1-Math.exp(-dt*r),tc=rgb(COL[c.st][1]);for(const f of['ks','nz','dmp','tr','pc','am'])c[f]+=(t[f]-c[f])*k;
- for(let i=0;i<3;i++){c.dw[i]+=((i<t.n?1:0)-c.dw[i])*E(i<t.n?2.2:5);c.col[i]+=(tc[i]-c.col[i])*E(5)}
- c.syn+=((c.st==='busy'?1:0)-c.syn)*E(2);c.blk+=((c.st==='blocked'?1:0)-c.blk)*E(3);c.ghost+=((c.st==='off'?1:0)-c.ghost)*E(2.5);
- const rel=hover&&(c.a===hover||c.b===hover);c.dim+=((hover&&!rel?.3:1)-c.dim)*E(6);c.hi+=((rel?1:0)-c.hi)*E(6);c.clk+=dt*CFG.pfrq/Math.max(.3,c.pc);
- // situação própria de cada fio: em teste só alguns sondam, na atualização só alguns atualizam, na anomalia só alguns adoecem; os demais seguem saudáveis, na cor da operação normal
- const hb=rgb(COL[c.base][1]);for(let i=0;i<3;i++)c.hc[i]+=(hb[i]-c.hc[i])*E(4);
- for(const s of c.strands){const t=c.st==='testing'?(s.probe?1:0):(c.st==='updating'||c.st==='anomaly')?(s.upd?1:0):1;s.sk+=(t-s.sk)*E(3)}}
-function geoC(c,dt){const el=id=>document.getElementById(id).getBoundingClientRect(),ra=el(c.a),rb=el(c.b),ca=[ra.left+ra.width/2,ra.top+ra.height/2],cb=[rb.left+rb.width/2,rb.top+rb.height/2],k=1-Math.exp(-dt*34);
- // o deslocamento lateral de cada fio é medido do mesmo lado nos dois tiles (esquerda do sentido de viagem), então os fios nunca se cruzam perto das bordas
- const a0=attach(ra,cb,0),b0=attach(rb,ca,0),sA=Math.sign(a0.tx*-a0.ny+a0.ty*a0.nx)||1,sB=Math.sign(b0.tx*b0.ny-b0.ty*b0.nx)||1;
- for(const s of c.strands){const a=attach(ra,cb,s.off*sA),b=attach(rb,ca,s.off*sB);if(!s.A){s.A=a;s.B=b}else{for(const f of['x','y','nx','ny','tx','ty']){s.A[f]=lerp(s.A[f],a[f],k);s.B[f]=lerp(s.B[f],b[f],k)}}}
-
- const m=c.strands[Math.floor(c.strands.length/2)];c.g={L:Math.hypot(m.B.x-m.A.x,m.B.y-m.A.y)||1};
- // velocidade com que os tiles da ligação estão sendo movidos (deixa os fios mais firmes e amortecidos durante o arraste)
- const spd=c.pA?(Math.hypot(m.A.x-c.pA[0],m.A.y-c.pA[1])+Math.hypot(m.B.x-c.pB[0],m.B.y-c.pB[1]))/Math.max(dt,1e-3):0;c.pA=[m.A.x,m.A.y];c.pB=[m.B.x,m.B.y];c.mv+=(Math.min(spd,2000)-c.mv)*(1-Math.exp(-dt*(spd>c.mv?14:4)));
- avoid(c,dt,m);ease(c,dt)}
-// desvio de obstáculos: os outros tiles empurram o feixe para o lado de menor desvio; se não há por onde desviar, os fios tentam se agarrar ao tile
-function avoid(c,dt,m){const K=96,A=m.A,B=m.B;let Tx=B.x-A.x,Ty=B.y-A.y;const Lc=Math.hypot(Tx,Ty)||1;Tx/=Lc;Ty/=Lc;const Nx=-Ty,Ny=Tx;c.nx=Nx;c.ny=Ny;c.dv.fill(0);if(!CFG.avd){c.ob={};c.gr=false;c.dvAct=0;dvBump(c);return}
- // a geometria do desvio só é recalculada quando a ligação ou algum tile muda de lugar; parado, reaproveita o resultado guardado (a suavização do lado e do agarre continua rodando)
- const hw=22,mg=16,gs=[],key=[A.x,A.y,A.nx,A.ny,B.x,B.y,B.nx,B.ny];for(const g of document.querySelectorAll('.g')){if(g.id===c.a||g.id===c.b)continue;const r=g.getBoundingClientRect();gs.push([g,r]);key.push(r.left,r.top,r.right,r.bottom)}
- const same=!!c.ak&&c.ak.length===key.length&&key.every((v,i)=>v===c.ak[i]);c.ak=key;let P=null;
- for(const[g,r]of gs){const o=c.ob[g.id]||(c.ob[g.id]={v:0,tgt:1,g:0,rect:r});o.rect=r;
-  if(!same||!o.geo){if(!P){P=[];for(let k=0;k<=K;k++)P.push(bz(m,k/K))}
-  const L0=r.left-mg-hw,R0=r.right+mg+hw,T0=r.top-mg-hw,B0=r.bottom+mg+hw,rp=new Float32Array(K+1),rn=new Float32Array(K+1);
-  for(let k=0;k<=K;k++){const p=P[k];let lo=-1e9,hi=1e9;
-   // interseção da reta p + s*N com o retângulo inflado (método das lajes)
-   for(const[o1,d,a0,a1]of[[p[0],Nx,L0,R0],[p[1],Ny,T0,B0]]){if(Math.abs(d)<1e-6){if(o1<a0||o1>a1){lo=1e9;hi=-1e9}}else{let s1=(a0-o1)/d,s2=(a1-o1)/d;if(s1>s2)[s1,s2]=[s2,s1];lo=Math.max(lo,s1);hi=Math.min(hi,s2)}}
-   if(lo<0&&hi>0){rp[k]=hi;rn[k]=-lo}}
-  const dil=a=>{const out=new Float32Array(K+1),Rr=46;for(let k=0;k<=K;k++){let best=0;for(let j=0;j<=K;j++){if(a[j]<=0)continue;const d=Math.abs(k-j)/K*Lc,v=a[j]*(1-sm(clamp(d/Rr)));if(v>best)best=v}out[k]=best}return out};
-  const dp=dil(rp),dn=dil(rn);let Dp=0,Dn=0;for(let k=0;k<=K;k++){Dp=Math.max(Dp,rp[k]);Dn=Math.max(Dn,rn[k])}
-  const hit=Dp>0||Dn>0,ins=(q,e)=>q.x>r.left-e&&q.x<r.right+e&&q.y>r.top-e&&q.y<r.bottom+e,blocked=hit&&(Math.min(Dp,Dn)>260||ins(A,10)||ins(B,10));o.geo={dp,dn,Dp,Dn,hit,blocked}}
-  const{dp,dn,Dp,Dn,hit,blocked}=o.geo;if(hit){if(Dp<Dn-12)o.tgt=1;else if(Dn<Dp-12)o.tgt=-1}
-  o.v+=(o.tgt-o.v)*(1-Math.exp(-dt*6));o.g+=((blocked?1:0)-o.g)*(1-Math.exp(-dt*4));
-  const wgt=1-o.g;for(let k=0;k<=K;k++){const u=k/K,e=sm(clamp(u/.025))*sm(clamp((1-u)/.025));c.dv[k]+=wgt*e*((1+o.v)/2*dp[k]-(1-o.v)/2*dn[k])}}
- c.gr=Object.values(c.ob).some(o=>o.g>.04);let mx=0;for(let k=0;k<=K;k++)mx=Math.max(mx,Math.abs(c.dv[k]));c.dvAct+=(clamp(mx/30)-c.dvAct)*(1-Math.exp(-dt*8));dvBump(c)}
-// número de versão do desvio da ligação: sobe só quando algum valor muda (a forma-alvo guardada dos fios depende dele)
-function dvBump(c){const p=c.dvP||(c.dvP=new Float32Array(97));for(let k=0;k<97;k++)if(p[k]!==c.dv[k]){p.set(c.dv);c.dvVer=(c.dvVer||0)+1;return}}
-function grips(c,s,time){for(const id in c.ob){const o=c.ob[id];if(o.g<.04)continue;const r=o.rect,ins=(x,y)=>x>r.left&&x<r.right&&y>r.top&&y<r.bottom;
-  for(let j=0;j<NP-1;j++){const a=ins(s.dx[j],s.dy[j]),b=ins(s.dx[j+1],s.dy[j+1]);if(a===b)continue;let lo=[s.dx[j],s.dy[j]],hi=[s.dx[j+1],s.dy[j+1]];
-   for(let it=0;it<7;it++){const md=[(lo[0]+hi[0])/2,(lo[1]+hi[1])/2];if(ins(md[0],md[1])===a)lo=md;else hi=md}
-   const Pt=[(lo[0]+hi[0])/2,(lo[1]+hi[1])/2],dl=Pt[0]-r.left,dr=r.right-Pt[0],dt=Pt[1]-r.top,db=r.bottom-Pt[1],mn=Math.min(dl,dr,dt,db);let nx=0,ny=0;if(mn===dl)nx=-1;else if(mn===dr)nx=1;else if(mn===dt)ny=-1;else ny=1;
-   const nf=1+((s.i+j)%2);for(let k=0;k<nf;k++){const sg=(s.i+k)%2?1:-1,gp=o.g*(.5+.5*Math.sin(time*1.8+s.ph[0]+k*1.9)),len=(7+17*(((s.i*7+k*3)%5)/4))*(.35+.65*gp),tx=-ny*sg,ty=nx*sg,
-     Ex=Pt[0]+tx*len+nx*.5,Ey=Pt[1]+ty*len+ny*.5,Cx=Pt[0]+nx*(2.5+3*gp)+tx*len*.5,Cy=Pt[1]+ny*(2.5+3*gp)+ty*len*.5;
-     ctx.lineCap='round';ctx.lineWidth=.5;ctx.strokeStyle=rg(c.col,.8*o.g*c.dim);ctx.beginPath();ctx.moveTo(Pt[0]+nx*.6,Pt[1]+ny*.6);ctx.quadraticCurveTo(Cx,Cy,Ex,Ey);ctx.stroke();dot([Ex,Ey],.55,lite(c.col,.5),.9*o.g*c.dim)}}}}
-
-const bz=(s,u)=>{const A=s.A,B=s.B,D=Math.hypot(B.x-A.x,B.y-A.y),k=.32*D,p1=[A.x+A.nx*k,A.y+A.ny*k],p2=[B.x+B.nx*k,B.y+B.ny*k],v=1-u,a=v*v*v,b=3*v*v*u,c=3*v*u*u,d=u*u*u;
- return[a*A.x+b*p1[0]+c*p2[0]+d*B.x,a*A.y+b*p1[1]+c*p2[1]+d*B.y]};
-let TN=0,DNOW=0;const SP=[];
-// ---- tentáculos (simbionte): um trecho do fio se projeta para fora do fluxo, se contorce, ramifica na ponta e recolhe ----
-const eob=r=>{const q=r-1;return 1+2.4*q*q*q+1.4*q*q};
-function tdEnv(x,e){if(x<e.rt)return e.tk!=null?eio(x/e.rt):eob(x/e.rt);if(x<e.hd)return 1+.05*Math.sin(x*22+e.p1);return 1-eio(clamp((x-e.hd)/(1-e.hd)))}
-function tdOff(s,u,tn,needV){let n=0,t=0,w=0,vx=0,vy=0,wt=0;for(const e of s.td){const age=tn-e.t0;if(age<0||age>e.dur)continue;const ex=tdEnv(age/e.dur,e),uc=e.uc+e.dr*Math.sin(tn*e.f2+e.p2),d=(u-uc)/e.wid,g=Math.exp(-Math.pow(Math.abs(d),e.tk!=null?2:1.7));if(g<.005)continue;
-  if(e.tk!=null){wt+=ex*g;if(needV){const a0=target(s,u,true),b0=target(s.cc.strands[e.tk],u,true);vx+=ex*g*(b0[0]-a0[0]);vy+=ex*g*(b0[1]-a0[1])}n+=ex*g*e.wr*.4*Math.sin(tn*e.f1-d*1.8+e.p1)}
-  else n+=e.side*ex*g*(e.amp*(1+.18*Math.sin(tn*e.f1*.7+e.p1))+e.wr*Math.sin(tn*e.f1-d*1.8+e.p1));t+=ex*g*(e.tw*Math.sin(tn*e.f1*1.3-d*2.4+e.p2)+e.ln*e.amp*.45);w+=ex*g}
- return[n,t,w,vx,vy,wt]}
-const TDP={testing:{el:s=>s.probe,iv:[2.6,4],amp:[26,52],wid:[.06,.09],dur:[3.2,4.4],rt:[.24,.32],hd:[.66,.74],wr:[3,5],tw:[4,7],emit:0},
- updating:{spot:.3,el:s=>s.upd,iv:[2.6,4.2],amp:[30,54],wid:[.05,.08],dur:[3.2,4.2],rt:[.2,.3],hd:[.72,.8],wr:[2.5,5],tw:[3,6],emit:.006},
- anomaly:{spot:.25,el:s=>s.upd,iv:[1.2,2.4],amp:[44,86],wid:[.04,.07],dur:[1.4,2.0],rt:[.12,.2],hd:[.5,.62],wr:[4,8],tw:[5,9],emit:.012}};
-function target(s,u,notd){const p=bz(s,u),q=bz(s,Math.min(1,u+.01)),r=bz(s,Math.max(0,u-.01)),tx=q[0]-r[0],ty=q[1]-r[1],L=Math.hypot(tx,ty)||1;let off=s.a*1.1*CFG.spr*openEnv(u);const to=(!notd&&s.td.length)?tdOff(s,u,TN,true):null;
- // o deslocamento nunca passa de meio raio de curvatura do lado de dentro da curva (evita cantos e laços)
- const h=.03,a=bz(s,Math.max(0,u-h)),c=bz(s,Math.min(1,u+h)),cr=(p[0]-a[0])*(c[1]-p[1])-(p[1]-a[1])*(c[0]-p[0]);
- if(Math.abs(cr)>1e-6&&off*cr>0){const R=Math.hypot(p[0]-a[0],p[1]-a[1])*Math.hypot(c[0]-p[0],c[1]-p[1])*Math.hypot(c[0]-a[0],c[1]-a[1])/(2*Math.abs(cr));if(Math.abs(off)>.5*R)off=Math.sign(off)*.5*R}
- const cc=s.cc,fu=clamp(u)*96,i0=Math.min(95,Math.floor(fu)),D=lerp(cc.dv[i0],cc.dv[i0+1],fu-i0),dX=cc.nx*D,dY=cc.ny*D;
- if(to){const nw=Math.max(1,to[5]);return[p[0]-ty/L*(off+to[0])+tx/L*to[1]+dX+to[3]/nw,p[1]+tx/L*(off+to[0])+ty/L*to[1]+dY+to[4]/nw]}
- return[p[0]-ty/L*off+dX,p[1]+tx/L*off+dY]}
-function reset(s){for(let j=0;j<NP;j++){const t=target(s,j/(NP-1));s.x[j]=s.px[j]=t[0];s.y[j]=s.py[j]=t[1];s.alive[j]=true;s.ax[j]=s.bx[j]=t[0];s.ay[j]=s.by[j]=t[1]}s.cut=-1;s.contract=0;s.met=0;s.init=true;s.tok=false}
-const cutIdx=(s,st)=>clamp(Math.round((st==='broken'?.42+s.cutF*.2:s.cutF)*(NP-1)),6,NP-9);
-// folga entre as pontas de um fio quebrado: abre no rompimento; depois, a cada tentativa, as pontas se aproximam, quase encostam, falham e recuam um pouco (cada tentativa chega a uma distância diferente; o tremor fica só na ponta, no passo da física)
-const hsh=(a,b)=>fr(Math.sin(a*12.9898+b*78.233)*43758.5453);
-function brGap(s,time){const te=time-s.cutT,gx=18+9*fr(s.pph*5.1);if(te<.55)return gx*sm(te/.55);
- const P=2.6+1.8*fr(s.pph*7.3),z=(te-.55)/P,n=Math.floor(z),x=z-n,gm=1.2+4.5*hsh(n+s.pph*31,s.i),gh=9+5*hsh(n+.5+s.pph*31,s.i);
- if(x<.5)return lerp(gx,gm,eio(x/.5));if(x<.68)return gm;if(x<.78)return lerp(gm,gh,sm((x-.68)/.1));return lerp(gh,gx,sm((x-.78)/.22))}
-const ptr={x:-999,y:-999,on:false};let dragging=false;
-function step(c,time,dt){const st=c.st,ts=time-c.t0;TN=time;for(const s of c.strands){if(!s.A)continue;if(!s.init)reset(s);if(st==='off')continue;
-  const cdt=st==='retract'?.8+s.dly*.55:.3+s.dly*.55;
-  if(s.cut<0&&(st==='retract'||st==='broken')&&ts>cdt&&!(st==='broken'&&s.keep)){const k=cutIdx(s,st);s.cut=k;s.alive[k]=false;s.cutT=time;for(let j=0;j<NP;j++){const isA=j<=k,an=isA?s.A:s.B,f=(isA?j:NP-1-j)/Math.max(1,isA?k:NP-2-k),vx=an.x-s.x[j],vy=an.y-s.y[j],L=Math.hypot(vx,vy)||1,mag=(st==='broken'?.06:.2)*s.rec*Math.pow(f,1.5);s.px[j]=s.x[j]-vx/L*mag;s.py[j]=s.y[j]-vy/L*mag}}
-  // comprimento de repouso de cada segmento = distância entre nós vizinhos da forma-alvo (o espaçamento do alvo não é uniforme; um comprimento único forçava zigue-zague junto aos tiles)
-  const rl=s.rl||(s.rl=new Float64Array(NP-1)),brk=st==='broken'&&s.cut>=0;
-  if(brk){s.tok=false;
-   // quebrada: cada metade segue o caminho do feixe intacto até perto do corte; a folga entre as pontas abre e fecha (as metades tentam se reencontrar)
-   const TX=s.tgx||(s.tgx=new Float64Array(NP)),TY=s.tgy||(s.tgy=new Float64Array(NP)),k=s.cut,g=brGap(s,time),wA=.5+.22*Math.sin(time*.37+s.ph[0]),um=(k+.5)/(NP-1),Lt=s.Lt||c.g.L,uA=Math.max(.05,um-g*wA/Lt),uB=Math.min(.95,um+g*(1-wA)/Lt);s.gap=g;
-   for(let j=0;j<NP;j++){const t=target(s,j<=k?j/k*uA:uB+(j-k-1)/(NP-2-k)*(1-uB));TX[j]=t[0];TY[j]=t[1]}
-   let sl=0;for(let j=0;j<NP-1;j++){const d=Math.hypot(TX[j+1]-TX[j],TY[j+1]-TY[j]);sl+=d;rl[j]=j===k?0:d}s.Lt=sl}
-  else{
-   // forma-alvo de cada nó (posição, normal e comprimentos de repouso): calculada uma vez e reaproveitada nos passos seguintes enquanto
-   // nada de que ela depende muda (pontas do fio, direção da ligação, abertura e início do feixe, desvio de tiles) e o fio não tem tentáculos
-   const A=s.A,B=s.B,cc=s.cc,K=s.tkey||(s.tkey=new Float64Array(13)),kv=[A.x,A.y,A.nx,A.ny,B.x,B.y,B.nx,B.ny,CFG.spr,CFG.ops,cc.dvVer||0,cc.nx,cc.ny];
-   let ok=s.tok&&!s.td.length;if(ok)for(let q=0;q<13;q++)if(K[q]!==kv[q]){ok=false;break}
-   if(!ok){const TX=s.tgx||(s.tgx=new Float64Array(NP)),TY=s.tgy||(s.tgy=new Float64Array(NP)),NX=s.tnx||(s.tnx=new Float64Array(NP)),NY=s.tny||(s.tny=new Float64Array(NP));let tp=target(s,0),sl=0;TX[0]=tp[0];TY[0]=tp[1];for(let j=1;j<NP;j++){const t=target(s,j/(NP-1));TX[j]=t[0];TY[j]=t[1];rl[j-1]=Math.hypot(t[0]-tp[0],t[1]-tp[1]);sl+=rl[j-1];tp=t}s.Lt=sl;
-    for(let j=1;j<NP-1;j++){const u=j/(NP-1),q1=bz(s,Math.min(1,u+.01)),q0=bz(s,Math.max(0,u-.01)),tl=Math.hypot(q1[0]-q0[0],q1[1]-q0[1])||1;NX[j]=-(q1[1]-q0[1])/tl;NY[j]=(q1[0]-q0[0])/tl}
-    K.set(kv);s.tok=!s.td.length}}
-  const cA=s.cA||(s.cA=new Float64Array(NP)),cB=s.cB||(s.cB=new Float64Array(NP));for(let k=1;k<NP;k++){cA[k]=cA[k-1]+rl[k-1];cB[k]=cB[k-1]+rl[NP-1-k]}
-  s.td=s.td.filter(e=>time-e.t0<=e.dur);s.inf=s.inf.filter(f=>time-f.t0<f.hold+2.2);
-  for(const e of s.td)if(e.tk!=null&&!e.cd&&(time-e.t0)/e.dur>e.rt){e.cd=1;const h=s.cc.strands[e.tk];h.inf.push({uc:e.uc,t0:time,hold:(e.hd-e.rt)*e.dur,w:.05+.05*s.rnd()});h.rip=time}
-  if(s.cut<0&&CFG.tdl>.02&&TDP[st]&&TDP[st].el(s)&&time>=s.nxt){const q=TDP[st],r=s.rnd,R2=a=>a[0]+(a[1]-a[0])*r();let sp=r()<(q.spot||0);let tk=null;if(st==='anomaly'&&!sp&&s.td.some(e=>e.tk!=null))sp=true;if(st==='anomaly'&&!sp){const hs=c.strands.filter(t=>!t.upd);if(hs.length){const far=hs.filter(t=>Math.abs(t.i-s.i)>=2),pool=far.length?far:hs;tk=pool[Math.floor(r()*pool.length)].i}}
-   s.td.push({tk,spot:sp,t0:time,dur:tk!=null?R2([2.8,3.8]):R2(q.dur)*(sp?1.3:1),uc:.28+.44*r(),wid:sp?.035:tk!=null?R2([.1,.16]):R2(q.wid),amp:Math.min(R2(q.amp),c.g.L*.3)*(sp?.12:1)*CFG.tdl,side:r()<.5?-1:1,rt:tk!=null?R2([.22,.3]):R2(q.rt),hd:tk!=null?R2([.72,.8]):R2(q.hd),wr:R2(q.wr),tw:R2(q.tw),f1:2.2+r()*2.4,f2:.5+r()*.7,p1:r()*TAU,p2:r()*TAU,dr:.035+.05*r(),fk:r(),ln:(r()-.5)*1.6});s.nxt=time+R2(q.iv)/clamp(CFG.tdl,.5,2)}
-  if(TDP[st]&&TDP[st].emit)for(const e of s.td){const x=(time-e.t0)/e.dur;if(x>e.rt&&x<e.hd&&s.rnd()<TDP[st].emit){const j=clamp(Math.round(e.uc*(NP-1)),2,NP-3),b=bz(s,j/(NP-1)),dx=s.x[j]-b[0],dy=s.y[j]-b[1],l=Math.hypot(dx,dy)||1,v=14+16*s.rnd(),pw=(s.rnd()-.5)*14;SP.push({x:s.x[j],y:s.y[j],vx:dx/l*v-dy/l*pw,vy:dy/l*v+dx/l*pw,t0:time,life:1+.8*s.rnd(),col:c.col.slice()})}}
-  s.contract=st==='retract'&&s.cut>=0?eio(clamp((time-s.cutT-.35-s.dly*.2)/(1.7/s.rs))):0;
-  const free=s.cut>=0,rage=time-s.rip-s.i*.035,mvk=clamp(c.mv/250),dmpm=clamp(1-(1-lerp(Math.pow(c.dmp,3),.8,clamp(c.mv/200)))/CFG.sway,.5,.993);
-  for(let j=1;j<NP-1;j++){const u=j/(NP-1);let fx=0,fy=0;
-   if(free&&brk){const isA=j<=s.cut,idx=isA?j:NP-1-j,cnt=isA?s.cut:NP-2-s.cut,f=idx/Math.max(1,cnt),TX=s.tgx,TY=s.tgy,j0=j-1,j1=j+1;let tx=TX[j1]-TX[j0],ty=TY[j1]-TY[j0];const tl=Math.hypot(tx,ty)||1;tx/=tl;ty/=tl;
-    // a ponta procura a outra: oscila de lado mais quando está longe e se alinha quando chega perto
-    const te=time-s.cutT,gr=clamp(s.gap/24),srch=(1+2.6*gr)*(.6+.5*s.wa)*Math.pow(f,2.2)*Math.sin(time*(1.3+.7*s.rs)+s.ph[isA?3:2]+f*1.6),
-     wv=(.5+1.2*s.wa)*Math.pow(f,1.3)*(Math.sin(time*s.wf[0]*2.4-f*s.wk[0]*TAU+s.ph[0])+.5*Math.sin(time*s.wf[1]*3-f*s.wk[1]*TAU+s.ph[1])),trm=.7*(1-clamp(s.gap/7))*Math.pow(f,4)*Math.sin(time*19+s.ph[isA?2:3]),lat=(srch+wv)*CFG.life+trm,
-     kp=(.035+.1*Math.exp(-te*2.2))*(.8+.4*s.stf)*(1-.3*f)*(1+2*mvk);
-    fx=kp*(TX[j]-ty*lat-s.x[j]);fy=kp*(TY[j]+tx*lat-s.y[j]);
-    const dd=lerp(lerp(.9,.962,clamp(te/1.2)),.84,clamp(c.mv/200)),vx=(s.x[j]-s.px[j])*dd,vy=(s.y[j]-s.py[j])*dd;s.px[j]=s.x[j];s.py[j]=s.y[j];s.x[j]+=vx+fx;s.y[j]+=vy+fy;continue}
-   if(free){const isA=j<=s.cut,an=isA?s.A:s.B,idx=isA?j:NP-1-j,cnt=isA?s.cut:NP-2-s.cut,f=idx/Math.max(1,cnt),len=(isA?cA[idx]:cB[idx])*.985,lat=s.a*.12*(1-.85*f),Tx=an.x+an.nx*len+an.tx*lat,Ty=an.y+an.ny*len+an.ty*lat,kp=(.02+.13*Math.exp(-(time-s.cutT)*2.6))*(.8+.4*s.stf)*(1-.5*f)*(1+2*mvk),Wp=(1.5+4*s.wa)*Math.pow(f,1.4)*CFG.life,
-     wv=Wp*(Math.sin(time*s.wf[0]*3-f*s.wk[0]*TAU+s.ph[0])+.5*Math.sin(time*s.wf[1]*3.7-f*s.wk[1]*TAU+s.ph[1]));
-    fx=kp*(Tx-s.x[j])+kp*wv*an.tx;fy=kp*(Ty-s.y[j])+kp*wv*an.ty;
-    const dd=lerp(lerp(.93,s.fd,clamp((time-s.cutT)/1.4)),.84,clamp(c.mv/200)),vx=(s.x[j]-s.px[j])*dd,vy=(s.y[j]-s.py[j])*dd;s.px[j]=s.x[j];s.py[j]=s.y[j];s.x[j]+=vx+fx;s.y[j]+=vy+fy;continue}
-   const T=[s.tgx[j],s.tgy[j]],nx=s.tnx[j],ny=s.tny[j];
-   const tdv=s.td.length?tdOff(s,u,time):null,act=tdv?tdv[2]:0,wt=tdv?Math.min(1,tdv[5]):0,ksj=c.ks*lerp(1+(s.stf-1)*Math.min(1,CFG.life),1,mvk)*(1+2.2*Math.min(1,act))*(1+4*wt)*(1+1.5*mvk/CFG.sway)*(1+2*c.dvAct),dl=lerp(dmpm,.7,wt);fx+=(T[0]-s.x[j])*ksj;fy+=(T[1]-s.y[j])*ksj;
-   const env=Math.pow(Math.sin(Math.PI*u),1.2),Ap=c.nz*8*s.wa*env*ksj*CFG.life*CFG.wav,wv=Ap*(Math.sin(time*s.wf[0]*3-u*s.wk[0]/CFG.wln*TAU+s.ph[0])+.5*Math.sin(time*s.wf[1]*3.7-u*s.wk[1]/CFG.wln*TAU+s.ph[1]));fx+=nx*wv;fy+=ny*wv;if(st==='broken'&&s.keep){const jj=.03*CFG.life*Math.sin(Math.PI*u)*Math.sin(time*11+u*14+s.ph[0])*(.5+.5*Math.sin(time*1.7+s.ph[1]));fx+=nx*jj;fy+=ny*jj}
-   // ondulação suave em mudança de estado: percorre o feixe e se apaga
-   if(rage>0&&rage<2.4){const amp=.1*Math.min(1,CFG.life)*Math.exp(-2*rage)*Math.sin(Math.PI*u)*Math.sin(TAU*(u*1.3-rage*1.1));fx+=nx*amp;fy+=ny*amp}
-   // o mouse afasta os fios de leve; a mola da forma os traz de volta
-   if(ptr.on&&!dragging){const ddx=s.x[j]-ptr.x,ddy=s.y[j]-ptr.y,d2=ddx*ddx+ddy*ddy;if(d2<4900){const d=Math.sqrt(d2)||1,kk=1-d/70;fx+=ddx/d*kk*kk*.5;fy+=ddy/d*kk*kk*.5}}
-   const vx=(s.x[j]-s.px[j])*dl,vy=(s.y[j]-s.py[j])*dl;s.px[j]=s.x[j];s.py[j]=s.y[j];s.x[j]+=vx+fx;s.y[j]+=vy+fy}
-  s.x[0]=s.A.x;s.y[0]=s.A.y;s.x[NP-1]=s.B.x;s.y[NP-1]=s.B.y;
-  for(let it=0;it<(free?10:8);it++){for(let j=0;j<NP-1;j++){if(!s.alive[j])continue;const dx=s.x[j+1]-s.x[j],dy=s.y[j+1]-s.y[j],d=Math.hypot(dx,dy)||1e-6,diff=(d-rl[j])/d;let w0=j===0?0:.5,w1=j+1===NP-1?0:.5;if(j===0)w1=1;if(j+1===NP-1)w0=1;
-    s.x[j]+=dx*diff*w0;s.y[j]+=dy*diff*w0;s.x[j+1]-=dx*diff*w1;s.y[j+1]-=dy*diff*w1}
-   s.x[0]=s.A.x;s.y[0]=s.A.y;s.x[NP-1]=s.B.x;s.y[NP-1]=s.B.y}
-  if(!free)for(const id in c.ob){const o=c.ob[id];if(o.g>.5||!o.rect)continue;const r=o.rect,e=5,L0=r.left-e,R0=r.right+e,T0=r.top-e,B0=r.bottom+e,sg=o.v>=0?1:-1;
-   for(let j=1;j<NP-1;j++){const x=s.x[j],y=s.y[j];if(x>L0&&x<R0&&y>T0&&y<B0){let lo=-1e9,hi=1e9;for(const[o1,d,a0,a1]of[[x,c.nx,L0,R0],[y,c.ny,T0,B0]]){if(Math.abs(d)>1e-6){let q1=(a0-o1)/d,q2=(a1-o1)/d;if(q1>q2)[q1,q2]=[q2,q1];lo=Math.max(lo,q1);hi=Math.min(hi,q2)}}
-    const t=sg>0?hi:lo;if(Math.abs(t)<400){const X2=x+c.nx*t,Y2=y+c.ny*t;s.x[j]=X2;s.y[j]=Y2;s.px[j]=lerp(s.px[j],X2,.6);s.py[j]=lerp(s.py[j],Y2,.6)}}}}
-  s.ax.set(s.bx);s.ay.set(s.by);s.bx.set(s.x);s.by.set(s.y)}}
-const pos=(s,u)=>{const X=s.dx,Y=s.dy,n=NP-1,x=clamp(u)*n,i=Math.min(n-1,Math.floor(x)),t=x-i,t2=t*t,t3=t2*t,g=k=>Math.max(0,Math.min(n,k)),a=g(i-1),b=g(i),c=g(i+1),d=g(i+2);
- return[.5*(2*X[b]+(-X[a]+X[c])*t+(2*X[a]-5*X[b]+4*X[c]-X[d])*t2+(-X[a]+3*X[b]-3*X[c]+X[d])*t3),.5*(2*Y[b]+(-Y[a]+Y[c])*t+(2*Y[a]-5*Y[b]+4*Y[c]-Y[d])*t2+(-Y[a]+3*Y[b]-3*Y[c]+Y[d])*t3)]};
-const prof=u=>.22+.78*Math.pow(Math.sin(Math.PI*clamp(u)),.6);
-// fita contínua de largura variável (um único polígono por trecho, sem emendas)
-function infAt(s,u,tn){let v=0;for(const f of s.inf){const a=tn-f.t0,am=sm(clamp(a/.5))*(1-sm(clamp((a-f.hold)/1.6))),sp=f.w+.07*sm(clamp(a/Math.max(.5,f.hold)));v+=am*Math.exp(-Math.pow((u-f.uc)/sp,2))}return Math.min(1,v)}
-function ribbon(c,s,s0,s1,col,a,wd,o){o=o||{};if(s1-s0<.004||a<.004)return;const M=Math.max(8,Math.ceil((s1-s0)*c.g.L/4)),X=[],Y=[],TX=[],TY=[],W=[];
- for(let j=0;j<=M;j++){const p=pos(s,s0+(s1-s0)*j/M);X.push(p[0]);Y.push(p[1])}
- for(let j=0;j<=M;j++){const u=s0+(s1-s0)*j/M,a0=Math.max(0,j-1),b0=Math.min(M,j+1);let tx=X[b0]-X[a0],ty=Y[b0]-Y[a0];const l=Math.hypot(tx,ty)||1;TX.push(tx/l);TY.push(ty/l);
-  const TL=o.tl||.1;let tip=1;if(o.fa)tip=Math.min(tip,clamp((u-s0)/TL));if(o.fb)tip=Math.min(tip,clamp((s1-u)/TL));
-  let w=wd*prof(u)*(.1+.9*sm(tip))*.5;if(s.td.length)w*=1+.9*Math.min(1.2,tdOff(s,u,DNOW)[2]);if(o.neck)w*=1-.9*o.neck.k*Math.exp(-Math.pow((u-o.neck.u)/.05,2));W.push(Math.max(.09,w))}
- const path=k=>{ctx.beginPath();ctx.moveTo(X[0]-TY[0]*W[0]*k,Y[0]+TX[0]*W[0]*k);for(let j=1;j<=M;j++)ctx.lineTo(X[j]-TY[j]*W[j]*k,Y[j]+TX[j]*W[j]*k);for(let j=M;j>=0;j--)ctx.lineTo(X[j]+TY[j]*W[j]*k,Y[j]-TX[j]*W[j]*k);ctx.closePath()};
- const g=ctx.createLinearGradient(X[0],Y[0],X[M],Y[M]);for(let k=0;k<=16;k++){const u=s0+(s1-s0)*k/16,ef=Math.min(clamp(u/.05),clamp((1-u)/.05));const TL=o.tl||.1;let tp=1;if(o.fa)tp=Math.min(tp,clamp((u-s0)/TL));if(o.fb)tp=Math.min(tp,clamp((s1-u)/TL));const ic=s.inf.length?infAt(s,u,DNOW):0;g.addColorStop(k/16,rg(ic>.01?mixc(col,c.col,ic*.9):col,a*(.2+.8*sm(ef))*(.25+.75*sm(tp))))}
- // borda suave: uma passada mais larga e bem fraca por baixo da passada principal (tira o serrilhado de fios sub-pixel)
- ctx.fillStyle=g;ctx.globalAlpha=Math.min(1,.2*CFG.glo);path(2.6);ctx.fill();ctx.globalAlpha=1;path(1);ctx.fill()}
-function dot(p,r,col,a){a*=CFG.glo;r*=CFG.pdot;if(a<.01)return;DOTS++;ctx.fillStyle=rg(col,a*.14);ctx.beginPath();ctx.arc(p[0],p[1],r*2.3,0,TAU);ctx.fill();ctx.fillStyle=rg(col,a);ctx.beginPath();ctx.arc(p[0],p[1],r,0,TAU);ctx.fill()}
-const RED=lite(rgb('#FF4B4B'),.35),mixc=(a,b,t)=>a.map((v,i)=>v+(b[i]-v)*t);
-function branch(P,ang,len,depth,time,seed,k,col,a,hot,bf){if(k<.03)return;const dx=Math.cos(ang),dy=Math.sin(ang),w=Math.sin(time*(1.3+(seed%1))+seed*7)*len*.32,L=len*k,Ex=P[0]+dx*L,Ey=P[1]+dy*L,Cx=P[0]+dx*L*.55-dy*w*k,Cy=P[1]+dy*L*.55+dx*w*k;
- ctx.lineCap='round';ctx.lineWidth=.3+.14*depth;ctx.strokeStyle=rg(col,a*(.5+.12*depth));ctx.beginPath();ctx.moveTo(P[0],P[1]);ctx.quadraticCurveTo(Cx,Cy,Ex,Ey);ctx.stroke();
- if(depth>0&&k>.3){const kc=clamp((k-.3)/.7);for(const[t,sg,fl]of(bf===3?[[.4,1,.6],[.65,-1,.52],[.9,1,.4]]:[[.5,1,.62],[.82,-1,.5]])){const v=1-t;branch([v*v*P[0]+2*v*t*Cx+t*t*Ex,v*v*P[1]+2*v*t*Cy+t*t*Ey],ang+sg*(.75+.3*Math.sin(seed*3+t*5+time*.7)),len*fl,depth-1,time,seed*1.7+sg+t,kc,col,a,hot,bf)}}
- else if(depth===0){ctx.fillStyle=rg(hot,a*.9);ctx.beginPath();ctx.arc(Ex,Ey,.5,0,TAU);ctx.fill()}}
-function fingers(s,c,hot,time,dm){const scol=mixc(c.hc,c.col,s.sk),st=c.st;for(const e of s.td){const age=time-e.t0;if(age<0||age>e.dur)continue;const ex=tdEnv(age/e.dur,e),k0=clamp((ex-(e.spot?.15:.45))/.55);if(k0<.02)continue;
-  const uc=clamp(e.uc+e.dr*Math.sin(time*e.f2+e.p2),.05,.95),P=pos(s,uc),Q=pos(s,uc+.012),O=pos(s,uc-.012),tx=Q[0]-O[0],ty=Q[1]-O[1],l=Math.hypot(tx,ty)||1;let base=Math.atan2(tx/l*e.side,-ty/l*e.side),near=false;
-  // na anomalia, os dedos apontam para o fio saudável; ao encostar, abraçam o fio ao longo dele
-  if(e.tk!=null){const Pt=pos(s.cc.strands[e.tk],uc),dd=Math.hypot(Pt[0]-P[0],Pt[1]-P[1]);if(dd>4)base=Math.atan2(Pt[1]-P[1],Pt[0]-P[0]);else{base=Math.atan2(ty,tx);near=true}}
-  const dep=(st==='testing'?3:st==='anomaly'?1:st==='updating'?1:0)+(e.spot?1:0),nf=e.tk!=null?2+Math.floor(e.fk*2):e.spot?2+Math.floor(e.fk*2):st==='testing'?2+Math.floor(e.fk*2.5):1+Math.floor(e.fk*2.6),fa=.8*k0*dm,
-   len0=(8+10*e.fk)*Math.sqrt(CFG.tdl)*(e.spot?1.15:1)*(st==='testing'?1.15:1)*(e.tk!=null?.7:1);
-  for(let k=0;k<nf;k++)branch([P[0],P[1]],base+(k-(nf-1)/2)*(near?1.4:.9)+Math.sin(time*e.f1*.9+k*2.1+e.p1)*.3,len0,e.tk!=null?Math.min(dep,1):dep,time,e.fk*100+k*13,k0,scol,fa,hot,st==='testing'?3:2);
-  if(near)dot(P,.9,hot,.7*k0*dm)}}
-// pulsos de cada metade rompida correm até a ponta e tentam alcançar a outra metade (saltam um pouco além da ponta, piscam e se apagam)
-function seekDots(c,s,hot,time,isA,uEnd,tip,dir,ph,lim){for(let k=0;k<2;k++){const w=c.dw[k];if(w<.02)continue;const x=fr(c.clk*s.rate*.8+s.pph+k*.5+ph),T=.78;let p,al=w;
-  if(x<T){const q=sm(x/T),u=isA?uEnd*q:1-(1-uEnd)*q;p=pos(s,u);al*=sm(isA?clamp(u/.07):clamp((1-u)/.07))}
-  else{const l=(x-T)/(1-T),d=Math.min(24*l*(1-.35*l),lim==null?99:lim);p=[tip[0]+dir[0]*d+Math.sin(time*9+s.ph[1])*dir[1]*1.4,tip[1]+dir[1]*d-Math.sin(time*9+s.ph[1])*dir[0]*1.4];al*=Math.pow(1-l,1.6)*(.65+.35*Math.sin(time*18+s.ph[2]))}
-  dot(p,.5+.28*s.w,hot,al*.85*s.al*c.dim)}}
-// cadeado no centro do feixe: na seção transversal que passa pelo meio do fio central, fica a meio caminho entre os dois fios mais externos
-function lockAt(c){const s0=c.strands[Math.floor(c.strands.length/2)];if(!s0.init)return null;const m=pos(s0,.5),p1=pos(s0,.51),p0=pos(s0,.49);let tx=p1[0]-p0[0],ty=p1[1]-p0[1];const tl=Math.hypot(tx,ty)||1;tx/=tl;ty/=tl;const nx=-ty,ny=tx;let lo=1e9,hi=-1e9;
- for(const s of c.strands){if(!s.init)continue;let pu=null,pd=0;for(let i=0;i<=40;i++){const p=pos(s,.2+.6*i/40),d=(p[0]-m[0])*tx+(p[1]-m[1])*ty;if(pu&&(pd<=0)!==(d<0)){const t=pd/((pd-d)||1e-9),o=(lerp(pu[0],p[0],t)-m[0])*nx+(lerp(pu[1],p[1],t)-m[1])*ny;lo=Math.min(lo,o);hi=Math.max(hi,o);break}pu=p;pd=d}}
- if(lo>hi)return m;const o=(lo+hi)/2;return[m[0]+nx*o,m[1]+ny*o]}
-function draw(time,fa){DNOW=time;ctx.setTransform(DPR,0,0,DPR,0,0);ctx.clearRect(0,0,innerWidth,innerHeight);ctx.save();ctx.beginPath();ctx.rect(0,0,innerWidth,innerHeight);document.querySelectorAll('.g').forEach(g=>{const r=g.getBoundingClientRect();ctx.roundRect(r.left,r.top,r.width,r.height,14)});ctx.clip('evenodd');
- for(const c of C){const ts=time-c.t0,st=c.st,col=c.col,hot=lite(col,.55),dm=c.dim*(1+.3*c.hi);
-  for(const s of c.strands){if(!s.A||!s.init)continue;const col=mixc(c.hc,c.col,s.sk),hot=lite(col,.55);
-   if(st!=='off'||c.am>.01)for(let j=0;j<NP;j++){s.dx[j]=lerp(s.ax[j],s.bx[j],fa);s.dy[j]=lerp(s.ay[j],s.by[j],fa)}
-   s.dx[0]=s.A.x;s.dy[0]=s.A.y;s.dx[NP-1]=s.B.x;s.dy[NP-1]=s.B.y;
-   let wd=1.05*s.w*CFG.wid,al=s.al*c.am*dm*CFG.glo;
-   if(c.ghost>.01){ctx.strokeStyle=rg(col,.11*c.ghost*s.al*c.dim);ctx.lineWidth=.5;ctx.beginPath();ctx.moveTo(s.A.x,s.A.y);ctx.lineTo(s.B.x,s.B.y);ctx.stroke()}
-   if(st==='off')continue;
-   if(st==='unfurl'){const d=clamp((ts-s.dly*.6)/(2.2/s.rs)),f=.5*eio(d);
-     if(d>=1){ribbon(c,s,0,1,col,al,wd);if(!s.met){s.met=1;s.rip=time}}
-     else{s.met=0;ribbon(c,s,0,f,col,al,wd,{fb:1});ribbon(c,s,1-f,1,col,al,wd,{fa:1});if(f>.012){const a1=.8*clamp(f*14)*c.dim*(1-sm(clamp((f-.28)/.2))),g=Math.max(0,f-.018);dot(pos(s,g),.65,hot,a1);dot(pos(s,1-g),.65,hot,a1)}}continue}
-   if(s.cut>=0){const rr=st==='retract'?s.contract:0,cu=s.cut/(NP-1)*(1-rr),cu2=(s.cut+1)/(NP-1)+(1-(s.cut+1)/(NP-1))*rr,fade=st==='retract'?1-rr*rr:1,br=st==='broken'?.8+.2*Math.sin(time*.8+s.ph[2]):1,a2=al*fade*br;
-     if(fade>.02){const OX=s.dx,OY=s.dy,k=s.cut;
-      // cada metade é uma curva própria: os vizinhos além do corte são extrapolados, sem puxar a ponta para o outro lado
-      const AX=new Float64Array(NP),AY=new Float64Array(NP),BX=new Float64Array(NP),BY=new Float64Array(NP);
-      for(let j=0;j<NP;j++){if(j<=k){AX[j]=OX[j];AY[j]=OY[j]}else{AX[j]=OX[k]+(OX[k]-OX[k-1])*(j-k);AY[j]=OY[k]+(OY[k]-OY[k-1])*(j-k)}
-       if(j>=k+1){BX[j]=OX[j];BY[j]=OY[j]}else{BX[j]=OX[k+1]+(OX[k+1]-OX[k+2])*(k+1-j);BY[j]=OY[k+1]+(OY[k+1]-OY[k+2])*(k+1-j)}}
-      const brk=st==='broken';s.dx=AX;s.dy=AY;ribbon(c,s,0,cu,col,a2,wd,brk?{fb:1,tl:.045}:{fb:1});
-      if(brk){const tA=[OX[k],OY[k]],tB=[OX[k+1],OY[k+1]];let gx=tB[0]-tA[0],gy=tB[1]-tA[1];const gl=Math.hypot(gx,gy)||1;gx/=gl;gy/=gl;const lim=Math.max(1,gl*.5-1);seekDots(c,s,hot,time,true,cu,tA,[gx,gy],0,lim);
-       s.dx=BX;s.dy=BY;ribbon(c,s,cu2,1,col,a2,wd,{fa:1,tl:.045});seekDots(c,s,hot,time,false,cu2,tB,[-gx,-gy],.5,lim);
-       // quase encostou: um fiapo treme entre as pontas e uma faísca pisca no meio, mas não segura
-       if(gl<6){const q=1-gl/6,fl=.5+.5*Math.sin(time*23+s.ph[3])*Math.sin(time*7.1+s.ph[1]),M=[(tA[0]+tB[0])/2,(tA[1]+tB[1])/2];
-        if(gl<3.5){ctx.strokeStyle=rg(hot,a2*.55*q*fl);ctx.lineWidth=.3;ctx.beginPath();ctx.moveTo(tA[0],tA[1]);ctx.lineTo(tB[0],tB[1]);ctx.stroke()}
-        dot(M,.5,hot,a2*.9*q*q*fl)}}
-      else{s.dx=BX;s.dy=BY;ribbon(c,s,cu2,1,col,a2,wd,{fa:1})}
-      s.dx=OX;s.dy=OY}continue}
-   if(st==='broken'&&s.keep){wd*=.8;al*=.55+.45*sm(.5+.5*Math.sin(time*5.3+s.ph[2])*Math.sin(time*1.3+s.ph[0]))}
-   const neck=(st==='retract'||(st==='broken'&&!s.keep))?{u:(cutIdx(s,st)+.5)/(NP-1),k:sm(clamp(ts/(st==='retract'?.8+s.dly*.55:.3+s.dly*.55)))}:null;
-   ribbon(c,s,0,1,col,al,wd,neck?{neck}:{});if(s.td.length)fingers(s,c,hot,time,c.dim);if(c.gr)grips(c,s,time);
-   // pontinhos: pequenos e rápidos, movimento contínuo
-   const po=lerp(s.pph,c.sync+s.i*.012,c.syn),ftr=clamp((c.tr/CFG.pspd)/(c.pc/CFG.pfrq),.05,.95);
-   for(let k=0;k<3;k++){const w=c.dw[k];if(w<.02)continue;const phi=fr(c.clk*s.rate+po+k*lerp(.37,.1,c.syn));if(phi>=ftr)continue;const x=phi/ftr,u=x*.65+.35*sm(x),ef=Math.min(clamp(u/.07),clamp((1-u)/.07));
-     let a=w*sm(ef)*(.55+.45*s.al)*c.dim*(1+.25*c.hi);
-     if(st==='broken'&&s.keep){if(fr(time*.8+s.pph*3+k*.3)>.5)continue;a*=.5+.5*Math.sin(time*13+s.ph[3])}
-     let dc=hot,P0=pos(s,u);
-     if(c.blk>.01){if(c.blk>.5&&u>.52)continue;const fo=sm(clamp((u-.38)/.14));a*=1-c.blk*fo;dc=mixc(hot,RED,c.blk);
-      // o pulso vermelho se desfaz em faíscas que se dispersam antes do cadeado
-      if(u>.3&&c.blk>.2){const Q=pos(s,Math.min(1,u+.012)),tx=Q[0]-P0[0],ty=Q[1]-P0[1],tl=Math.hypot(tx,ty)||1;for(let q=0;q<3;q++){const of=(((q*37+s.i*13+k*7)%10)-4.5)/4.5,sp2=sm(clamp((u-.34)/.18))*8*of;dot([P0[0]-ty/tl*sp2+tx/tl*sp2*.3,P0[1]+tx/tl*sp2+ty/tl*sp2*.3],.42,dc,a*.0+.55*c.blk*(1-fo)*w*sm(clamp((u-.3)/.06)))}}}
-     dot(P0,.5+.28*s.w,dc,a)}
-  }
-  if(c.blk>.02){const m=lockAt(c);if(m){const a=c.blk;ctx.fillStyle=`rgba(23,23,26,${.95*a})`;ctx.strokeStyle=rg(col,.85*a);ctx.lineWidth=1;ctx.beginPath();ctx.arc(m[0],m[1],11,0,TAU);ctx.fill();ctx.stroke();ctx.fillStyle=rg(col,.85*a);ctx.fillRect(m[0]-5,m[1]-2,10,7);ctx.beginPath();ctx.arc(m[0],m[1]-2,3,Math.PI,0);ctx.stroke()}}
- }
- for(let i=SP.length-1;i>=0;i--){const q=SP[i],age=time-q.t0;if(age>q.life){SP.splice(i,1);continue}const k=1-age/q.life,e=1-Math.pow(1-clamp(age/1.6),2);dot([q.x+q.vx*e*1.2,q.y+q.vy*e*1.2],.6,lite(q.col,.5),.8*k*k)}
- ctx.restore()}
-let last=performance.now()/1000,acc=0,hover=null,gdt=0,dAcc=1,calm=false,calmT=0,lastAct=-99,DOTS=0,nDraw=0;
-// repouso total: janela sem foco, ou nada se movendo rápido (sem pontinhos visíveis, arraste, tentáculos, esporos, mudança de estado recente nem mouse/teclado nos últimos 2 s)
-function isCalm(time){if(!document.hasFocus())return true;if(dragging||time-lastAct<2||DOTS>0||SP.length)return false;for(const c of C){if(time-c.t0<6||c.mv>1)return false;for(const s of c.strands)if(s.td.length)return false}return true}
-// o desenho fica limitado a 60 quadros/s (monitores de 120/144 Hz não desenham à toa) e cai para 30 depois de 1 s de repouso total; a física continua em passos fixos de 1/60 s
-function frame(){const time=performance.now()/1000,dt=Math.min(.1,time-last);last=time;acc+=dt;gdt+=dt;dAcc+=dt;const div=calm?1/30:1/60,due=dAcc>=div*.9;
- if(acc<1/60&&!due){requestAnimationFrame(frame);return}
- const q0=performance.now();for(const c of C)geoC(c,Math.min(.1,gdt));gdt=0;let n=0;while(acc>=1/60&&n<5){for(const c of C)step(c,time,1/60);acc-=1/60;n++}if(n===5)acc=0;
- if(due){dAcc=clamp(dAcc-div,0,div);DOTS=0;draw(time,acc*60);nDraw++;if(!isCalm(time))calmT=time;calm=time-calmT>1}
- perfTick(performance.now()-q0);requestAnimationFrame(frame)}
-for(const ev of['pointermove','pointerdown','keydown','input','wheel'])addEventListener(ev,()=>lastAct=performance.now()/1000,{passive:true,capture:true});
-document.querySelectorAll('.g').forEach(g=>{g.onmouseenter=()=>hover=g.id;g.onmouseleave=()=>hover=null;let ox,oy,dr=false;g.onpointerdown=e=>{dr=dragging=true;g.setPointerCapture(e.pointerId);ox=e.clientX-g.offsetLeft;oy=e.clientY-g.offsetTop;g.classList.add('drag')};g.onpointermove=e=>{if(!dr)return;g.style.left=clamp(e.clientX-ox,0,innerWidth-210)+'px';g.style.top=clamp(e.clientY-oy,70,innerHeight-110)+'px'};g.onpointerup=()=>{dr=dragging=false;g.classList.remove('drag')}});
-addEventListener('pointermove',e=>{ptr.x=e.clientX;ptr.y=e.clientY;ptr.on=true});document.addEventListener('pointerleave',()=>ptr.on=false);
-const name=id=>document.getElementById(id).firstChild.textContent;const tg=document.getElementById('tg');tg.innerHTML=C.map(c=>`<option value="${c.id}">${name(c.a)} → ${name(c.b)}</option>`).join('');
-const later=(c,ms,fn)=>{(c.tm=c.tm||[]).push(setTimeout(fn,ms))},stop=c=>{(c.tm||[]).forEach(clearTimeout);c.tm=[]};const now=()=>performance.now()/1000;
-function go(c,st){const pv=c.st;c.prev=pv;c.st=st;if(['idle','flow','busy'].includes(st))c.base=st;c.t0=now();if(st!=='retract'&&st!=='broken'&&st!=='off'){for(const s of c.strands){if(s.cut>=0||pv==='off'||pv==='retract'||pv==='broken'){if(s.A)reset(s)}}}for(const s of c.strands){s.rip=now();s.nxt=now()+s.dly*.8}cap()}
-function cap(){document.getElementById('cap').innerHTML=[...new Set(C.map(c=>c.st))].map(k=>CAP[k]).join('<br>')}
-const by=id=>C.find(c=>c.id===id);
-function act(c,a){stop(c);const dead=c.st==='off'||c.st==='broken'||c.st==='retract',live={idle:'idle',flow:'flow',busy:'busy',test:'testing',upd:'updating',anom:'anomaly',block:'blocked'};
- if(a==='on'){go(c,'unfurl');later(c,4000,()=>go(c,'idle'))}else if(a==='off'){go(c,'retract');later(c,4800,()=>go(c,'off'))}else if(a==='break')go(c,'broken');
- else if(live[a]){const t=live[a];if(dead){go(c,'unfurl');later(c,3900,()=>go(c,t))}else{go(c,t);if(a==='test')later(c,7500,()=>go(c,'flow'));if(a==='upd')later(c,11000,()=>go(c,'flow'));if(a==='anom')later(c,9000,()=>go(c,'flow'))}}}
-document.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{const a=b.dataset.a;if(a==='restart'){const wk=['api-worker','worker-db','worker-chat'].map(by);wk.forEach(c=>{stop(c);go(c,'retract');later(c,4800,()=>go(c,'off'));later(c,5600,()=>go(c,'unfurl'));later(c,9700,()=>go(c,'testing'));later(c,13300,()=>go(c,c.id==='api-worker'?'flow':'idle'))});return}act(by(tg.value),a)});
-document.getElementById('leg').innerHTML=Object.values(COL).map(([n,c])=>`<span><i style="--c:${c}"></i>${n}</span>`).join('');
-if(location.hash){const a=location.hash.slice(1);if(a==='drag'){setTimeout(()=>{const g=document.getElementById('worker');const t0=performance.now();const id=setInterval(()=>{const k=(performance.now()-t0)/1000;g.style.left=(470+Math.sin(k*3)*140*Math.min(1,k))+'px';g.style.top=(390-Math.abs(Math.sin(k*2))*60)+'px';if(k>2.2)clearInterval(id)},16)},300)}else setTimeout(()=>act(by('api-worker'),a),150)}
-// ---- painel de ajustes: cada controle grava em CFG (e no navegador); a quantidade de fios e os pontos por fio recriam só os fios ----
-const pct=v=>Math.round(v*100)+'%',total=()=>C.reduce((t,c)=>t+nOf(c.n0),0);
-const SPEC=[['Pulsos',[['pspd','Velocidade',.3,3,pct],['pfrq','Frequência',.3,3,pct],['pdot','Tamanho',.5,2.5,pct]]],
- ['Fios',[['nmul','Quantidade',.3,5,()=>total()+' fios'],['wid','Espessura',.4,2.5,pct],['spr','Abertura',0,2,pct],['ops','Início',0,.4,pct,'Onde o feixe começa a se abrir, contando de cada tile.'],['glo','Brilho',.3,1.6,pct],['sat','Saturação',0,2,pct]]],
- ['Movimento',[['life','Vida própria',0,5,pct,'Em 0%, o feixe anda junto, como um traço só.'],['wav','Ondulação',0,3,pct],['wln','Comprimento',.4,6,pct,'Altura e comprimento das ondas ao longo de cada fio.'],['sway','Balanço',.3,3,pct],['tdl','Tentáculos',0,2,pct]]]];
-const RANGES=SPEC.flatMap(s=>s[1]);
-// presets: "Muitos fios · 60 fps" é o padrão com 106 fios (Quantidade 350%); medido num notebook Intel de 13ª geração, núcleo rápido, sem GPU:
-// ~4,4 ms em uso, ~6,4 ms na anomalia e ~8,7 ms testando (o estado mais pesado), com folga para a máquina ocupada
-const PRESETS={padrao:{...CFG_DEF},muitos:{...CFG_DEF,nmul:3.5}};
-function saveCfg(){try{localStorage.setItem('sinapses-cfg',JSON.stringify(CFG))}catch(e){}}
-function rebuild(all){for(const c of C){const n=nOf(c.n0);if(all||n!==c.ns){c.ns=n;mkS(c)}}}
-function syncCfg(){document.documentElement.style.setProperty('--sat',CFG.sat);const pk=Object.keys(PRESETS).find(k=>Object.keys(CFG_DEF).every(f=>PRESETS[k][f]===CFG[f]));document.getElementById('cfgPre').value=pk||'custom';for(const[k,,mn,mx,f]of RANGES){const el=document.getElementById('c_'+k);el.value=CFG[k];el.style.setProperty('--p',((CFG[k]-mn)/(mx-mn)*100)+'%');document.getElementById('o_'+k).textContent=f(CFG[k]);el.closest('.row').classList.toggle('mod',Math.abs(CFG[k]-CFG_DEF[k])>1e-6)}
- const sw=document.getElementById('c_avd');sw.setAttribute('aria-checked',CFG.avd);sw.closest('.row').classList.toggle('mod',CFG.avd!==CFG_DEF.avd);
- document.querySelectorAll('[data-np]').forEach(b=>{const on=+b.dataset.np===CFG.np;b.setAttribute('aria-checked',on);b.tabIndex=on?0:-1})}
-function setCfg(k,v){CFG[k]=v;if(k==='nmul')rebuild(false);if(k==='np'){NP=v;rebuild(true)}syncCfg();saveCfg()}
-(function(){const B=document.getElementById('cfgB');let h='';
- for(const[t,rows]of SPEC){h+=`<section><h3>${t}</h3>`;for(const[k,l,mn,mx,,hint]of rows)h+=`<div class="row" data-k="${k}" title="Duplo clique volta ao padrão"><label for="c_${k}">${l}</label><output id="o_${k}" for="c_${k}"></output><input type="range" id="c_${k}" min="${mn}" max="${mx}" step="${k==='ops'?.01:.05}"${hint?` aria-describedby="h_${k}"`:''}>${hint?`<small id="h_${k}">${hint}</small>`:''}</div>`;
-  if(t==='Movimento')h+=`<div class="row two"><span id="l_avd">Desviar dos tiles</span><button type="button" role="switch" id="c_avd" aria-labelledby="l_avd"><i></i></button></div>`;h+='</section>'}
- h+=`<section><h3>Física</h3><div class="row two"><span id="l_np">Pontos por fio</span><div class="seg" role="radiogroup" aria-labelledby="l_np">${[24,36,48,64].map(v=>`<button type="button" role="radio" data-np="${v}">${v}</button>`).join('')}</div></div></section>`;
- h+=`<footer><div class="act"><select id="cfgPre" aria-label="Preset"><option value="custom" disabled>Personalizado</option><option value="padrao">Padrão</option><option value="muitos">Muitos fios · 60 fps</option></select><button type="button" class="p" id="cfgCopy">Copiar ajustes</button></div></footer>`;
- B.innerHTML=h;
- for(const[k]of RANGES){const el=document.getElementById('c_'+k);el.addEventListener('input',()=>setCfg(k,+el.value));el.closest('.row').addEventListener('dblclick',()=>setCfg(k,CFG_DEF[k]))}
- document.getElementById('c_avd').onclick=()=>setCfg('avd',!CFG.avd);
- const nps=[...document.querySelectorAll('[data-np]')];nps.forEach((b,i)=>{b.onclick=()=>setCfg('np',+b.dataset.np);b.onkeydown=e=>{const d=e.key==='ArrowRight'||e.key==='ArrowDown'?1:e.key==='ArrowLeft'||e.key==='ArrowUp'?-1:0;if(!d)return;e.preventDefault();const nb=nps[(i+d+nps.length)%nps.length];setCfg('np',+nb.dataset.np);nb.focus()}});
- document.getElementById('cfgPre').onchange=e=>{const P=PRESETS[e.target.value];if(!P)return;const np=CFG.np,nm=CFG.nmul;Object.assign(CFG,P);NP=CFG.np;if(np!==CFG.np)rebuild(true);else if(nm!==CFG.nmul)rebuild(false);syncCfg();saveCfg()};
- const cp=document.getElementById('cfgCopy');cp.onclick=async()=>{const txt=JSON.stringify(CFG);let ok=false;try{await navigator.clipboard.writeText(txt);ok=true}catch(e){const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();try{ok=document.execCommand('copy')}catch(_){}ta.remove()}cp.textContent=ok?'Copiado':'Não copiou';clearTimeout(cp.t);cp.t=setTimeout(()=>cp.textContent='Copiar ajustes',1600)};
- // a janela recolhe pelo botão e se arrasta pelo cabeçalho
- const W=document.getElementById('cfg'),minB=document.getElementById('cfgMin'),setMin=m=>{W.classList.toggle('min',m);minB.setAttribute('aria-expanded',!m);minB.setAttribute('aria-label',m?'Abrir ajustes':'Recolher ajustes')};
- minB.onclick=()=>setMin(!W.classList.contains('min'));if(innerWidth<1200)setMin(true);
- const H=document.getElementById('cfgH');let ox,oy,dr=false;H.onpointerdown=e=>{if(e.target.closest('button'))return;dr=true;H.setPointerCapture(e.pointerId);const r=W.getBoundingClientRect();ox=e.clientX-r.left;oy=e.clientY-r.top;W.style.left=r.left+'px';W.style.right='auto';W.classList.add('drag')};
- H.onpointermove=e=>{if(!dr)return;W.style.left=clamp(e.clientX-ox,8,innerWidth-W.offsetWidth-8)+'px';W.style.top=clamp(e.clientY-oy,8,innerHeight-48)+'px'};H.onpointerup=()=>{dr=false;W.classList.remove('drag')};
- syncCfg()})();
-let pEma=0,pLast=0,pN=0;function perfTick(ms){pEma=pEma?pEma*.95+ms*.05:ms;const t=performance.now();if(!pLast){pLast=t;pN=nDraw;return}if(t-pLast<500)return;const fps=Math.round((nDraw-pN)*1000/(t-pLast));pN=nDraw;pLast=t;const el=document.getElementById('perf');if(el)el.textContent=`${Math.max(0,pEma).toFixed(1).replace('.',',')} ms · ${fps} fps`}
-addEventListener('resize',size);size();cap();requestAnimationFrame(frame);
-</script></body></html>
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sinapses</title>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <h1>Sinapses</h1>
+    <p class="sub">Fitas contínuas, estados que se misturam sem salto e pontinhos rápidos nos pulsos. Cada fio tem a sua situação. Arraste um nó por cima da ligação de outro: o feixe desvia até o último instante; se o nó cobre o ponto de chegada, os fios se agarram a ele e depois soltam.</p>
+    <div id="cap"></div>
+    <canvas id="cv"></canvas>
+    <div class="g" id="api" style="left: 90px; top: 200px">API<small>gateway</small></div>
+    <div class="g" id="worker" style="left: 470px; top: 390px">Worker<small>1.9 → 2.0</small></div>
+    <div class="g" id="chat" style="left: 870px; top: 190px">Chat<small>no ar</small></div>
+    <div class="g" id="db" style="left: 870px; top: 420px">Banco<small>3 bases</small></div>
+    <div class="panel">
+      <div class="box">
+        <h2>Ligação</h2>
+        <select id="tg" aria-label="Ligação"></select><br />
+        <button class="p" data-a="on">Ligar</button><button class="p" data-a="off">Desligar</button><button class="p" data-a="test">Testar</button><button class="p" data-a="upd">Atualizar</button><button class="p" data-a="anom">Anomalia</button><button data-a="busy">Operação</button><button data-a="flow">Em uso</button><button data-a="break">Quebrar</button><button data-a="block">Bloquear</button><button data-a="idle">Repouso</button>
+      </div>
+      <div class="box"><h2>Cenário completo</h2><button class="p" data-a="restart">Reiniciar worker</button></div>
+      <div class="box"><h2>Cores</h2><div class="leg" id="leg"></div></div>
+    </div>
+    <aside class="cfg" id="cfg" aria-labelledby="cfgT">
+      <header id="cfgH">
+        <h2 id="cfgT">Ajustes dos fios</h2>
+        <span class="perf" id="perf" title="Custo de cada quadro (física e desenho) e quadros desenhados por segundo: 60 em uso, 30 em repouso total">…</span>
+        <button type="button" class="ic" id="cfgMin" aria-expanded="true" aria-controls="cfgB" aria-label="Recolher ajustes"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M4 10l4-4 4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg></button>
+      </header>
+      <div class="cfgB" id="cfgB"></div>
+    </aside>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

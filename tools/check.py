@@ -13,7 +13,7 @@ import subprocess
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-DEMO = sys.argv[1] if len(sys.argv) > 1 else str(ROOT / "demo/index.html")
+DEMO = sys.argv[1] if len(sys.argv) > 1 else str(ROOT / "legacy/index.html")
 REF = json.dumps({"pspd": 1, "pfrq": 1, "pdot": 1, "nmul": 1, "wid": 1, "spr": 1, "ops": 0, "glo": 1, "sat": 1,
                   "life": 1, "wav": 1, "wln": 1, "sway": 1, "tdl": 1, "avd": True, "np": 48})
 STATES = ["none", "on", "off", "test", "upd", "anom", "busy", "flow", "break", "block", "idle"]

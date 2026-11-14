@@ -1,0 +1,26 @@
+{
+  "name": "sinapses",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Animated canvas strands that connect interface nodes and show each link state",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "check:demo": "uv run --quiet --with playwright python -I tools/check_demo.py",
+    "check:legacy": "python3 -I tools/check.py",
+    "fixtures": "python3 -I tools/parity_fixtures.py"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.8",
+    "vitest": "^5.1.0"
+  }
+}

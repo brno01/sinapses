@@ -1,0 +1,37 @@
+/* Mesmo visual da demo original (legacy/index.html). */
+*{margin:0;box-sizing:border-box}body{background:linear-gradient(100deg,#060607,#151518 70%,#1b1b1f);color:#ECEAE4;font:16px/1.4 "Barlow Condensed",sans-serif;height:100vh;overflow:hidden;position:relative;letter-spacing:.02em;user-select:none}
+canvas{position:absolute;left:0;top:0;width:100vw;height:100vh;pointer-events:none;z-index:1}h1{position:absolute;left:40px;top:22px;font-size:20px;letter-spacing:.14em;text-transform:uppercase;z-index:3}.sub{position:absolute;left:40px;top:52px;color:#9d9da2;max-width:760px;z-index:3}
+.g{position:absolute;z-index:2;width:210px;height:96px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);backdrop-filter:blur(18px);padding:14px 16px;box-shadow:0 10px 28px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.07);font-weight:700;letter-spacing:.05em;text-transform:uppercase;font-size:19px;cursor:grab;touch-action:none}
+.g small{display:block;font-weight:400;color:#9d9da2;text-transform:none;letter-spacing:0;font-size:14px}.g:hover{border-color:rgba(255,255,255,.35)}.g.drag{z-index:4;cursor:grabbing;border-color:rgba(255,106,85,.7)}
+.panel{position:absolute;left:40px;right:40px;bottom:20px;display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start;z-index:3}.box{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:10px 14px}.box h2{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:#9d9da2;margin-bottom:6px}
+button,select{font:inherit;font-size:15px;color:#ECEAE4;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:2px 12px;cursor:pointer;margin:0 6px 6px 0}button.p{background:#ECEAE4;color:#08080A;border-color:#ECEAE4;font-weight:700}
+.leg{display:flex;gap:6px 14px;flex-wrap:wrap;max-width:520px;font-size:15px;color:#c4c2bc}.leg span{display:flex;align-items:center;gap:6px}.leg i{width:22px;height:3px;border-radius:2px;background:var(--c);filter:saturate(var(--sat,1))}#cap{position:absolute;right:40px;top:26px;width:380px;color:#c4c2bc;z-index:3}#cap b{color:#ECEAE4}
+.cfg{position:absolute;right:24px;top:150px;width:316px;z-index:6;background:rgba(17,17,20,.84);border:1px solid rgba(255,255,255,.12);border-radius:14px;box-shadow:0 18px 44px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.06);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+.cfg header{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 7px 7px 16px;cursor:grab;touch-action:none;border-bottom:1px solid rgba(255,255,255,.08)}.cfg.min header{border-bottom-color:transparent}.cfg.drag header{cursor:grabbing}
+.cfg h2{font-size:14px;font-weight:700;letter-spacing:.16em;text-transform:uppercase}
+.cfg .ic{display:grid;place-items:center;width:30px;height:30px;padding:0;margin:0;border-radius:8px;background:transparent;border:1px solid transparent;color:#c4c2bc}.cfg .ic:hover{background:rgba(255,255,255,.07);color:#ECEAE4}
+.cfg .ic svg{transition:transform .28s cubic-bezier(.2,.8,.2,1)}.cfg.min .ic svg{transform:rotate(180deg)}
+.cfgB{padding:0 16px 14px;max-height:calc(100vh - 210px);overflow:auto;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.18) transparent}.cfg.min .cfgB{display:none}
+.cfg section{padding:7px 0 3px}.cfg section+section{border-top:1px solid rgba(255,255,255,.07)}
+.cfg h3{font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:#9d9da2;margin-bottom:2px}
+.cfg .row{display:grid;grid-template-columns:92px 1fr 50px;align-items:center;column-gap:10px;padding:1px 0}.cfg .row.two{grid-template-columns:1fr auto;padding:5px 0}
+.cfg label,.cfg .row>span{grid-column:1;grid-row:1;font-size:16px;color:#dedcd6;white-space:nowrap}
+.cfg output{grid-column:3;grid-row:1;font-size:15px;font-variant-numeric:tabular-nums;color:#9d9da2;text-align:right;white-space:nowrap;transition:color .2s}.cfg .row.mod output{color:#FF8A78}
+.cfg small{grid-column:1/-1;font-size:13px;color:#8f8f95;line-height:1.3;margin:-1px 0 3px;letter-spacing:.01em}
+.cfg input[type=range]{grid-column:2;grid-row:1;-webkit-appearance:none;appearance:none;width:100%;min-width:0;height:22px;margin:0;background:transparent;cursor:pointer;--p:50%}
+.cfg input[type=range]::-webkit-slider-runnable-track{height:3px;border-radius:2px;background:linear-gradient(90deg,#FF6A55 var(--p),rgba(255,255,255,.16) var(--p))}
+.cfg input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;margin-top:-5.5px;border-radius:50%;background:#ECEAE4;border:3px solid #FF6A55;box-shadow:0 2px 6px rgba(0,0,0,.5);transition:transform .15s,box-shadow .15s}
+.cfg input[type=range]:active::-webkit-slider-thumb{transform:scale(1.15)}
+.cfg input[type=range]::-moz-range-track{height:3px;border-radius:2px;background:rgba(255,255,255,.16)}.cfg input[type=range]::-moz-range-progress{height:3px;border-radius:2px;background:#FF6A55}
+.cfg input[type=range]::-moz-range-thumb{width:8px;height:8px;border-radius:50%;background:#ECEAE4;border:3px solid #FF6A55}
+.cfg input[type=range]:focus-visible{outline:none}.cfg input[type=range]:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 4px rgba(255,106,85,.38)}
+.cfg button:focus-visible{outline:2px solid #FF6A55;outline-offset:2px}
+.cfg [role=switch]{position:relative;width:38px;height:22px;padding:0;margin:0;border-radius:11px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);align-self:center;transition:background .2s,border-color .2s}
+.cfg [role=switch] i{position:absolute;left:3px;top:3px;width:14px;height:14px;border-radius:50%;background:#ECEAE4;transition:transform .22s cubic-bezier(.2,.8,.2,1)}
+.cfg [role=switch][aria-checked=true]{background:#FF6A55;border-color:#FF6A55}.cfg [role=switch][aria-checked=true] i{transform:translateX(16px)}
+.cfg .seg{display:flex;border:1px solid rgba(255,255,255,.2);border-radius:8px;overflow:hidden;align-self:center}
+.cfg .seg button{margin:0;border:0;border-radius:0;padding:2px 9px;font-size:15px;background:transparent;font-variant-numeric:tabular-nums}.cfg .seg button+button{border-left:1px solid rgba(255,255,255,.12)}
+.cfg .seg button:hover{background:rgba(255,255,255,.08)}.cfg .seg button[aria-checked=true]{background:#ECEAE4;color:#08080A;font-weight:700}.cfg .seg button:focus-visible{outline-offset:-2px}
+.cfg footer{border-top:1px solid rgba(255,255,255,.07);padding-top:10px;margin-top:6px}
+.cfg .perf{margin-left:auto;font-size:14px;color:#9d9da2;font-variant-numeric:tabular-nums;white-space:nowrap}
+.cfg{color-scheme:dark}.cfg .act{display:flex;gap:8px}.cfg .act select{margin:0;flex:1.25;min-width:0;padding:4px 8px;border-radius:8px}.cfg .act select:hover{border-color:rgba(255,255,255,.45)}.cfg .act select:focus-visible{outline:2px solid #FF6A55;outline-offset:2px}.cfg select option{background:#17171a;color:#ECEAE4}.cfg .act button{margin:0;flex:1;padding:4px 8px}.cfg .act button:hover{border-color:rgba(255,255,255,.45)}.cfg .act button.p:hover{background:#fff}

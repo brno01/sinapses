@@ -4,11 +4,11 @@
 #   sonda.py     arquivo em tools/probes/ (ex.: kinks.py)
 #   ação:seg     hash do harness (ex.: break:10, all-off:16, none:6)
 #   ajustes-json valores do painel aplicados antes de simular (ex.: '{"nmul":3,"tdl":1}')
-#   demo.html    padrão: demo/index.html
+#   demo.html    padrão: legacy/index.html
 # Variáveis: CORES="2,3" prende o Chrome nesses núcleos (medições de custo mais estáveis).
 set -euo pipefail
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
-probe=$1; hash=$2; cfg=${3:-}; demo=${4:-$ROOT/demo/index.html}
+probe=$1; hash=$2; cfg=${3:-}; demo=${4:-$ROOT/legacy/index.html}
 CH=$("$ROOT/tools/chrome.sh")
 T=$(mktemp -d); trap 'rm -rf "$T"' EXIT
 python3 -I "$ROOT/tools/harness.py" "$demo" "$T/a.html"

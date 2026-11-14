@@ -5,7 +5,7 @@
 #      tools/shot.sh flow:4 out/muitos.png '{"nmul":3,"tdl":1}'
 set -euo pipefail
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
-hash=$1; out=$2; cfg=${3:-}; demo=${4:-$ROOT/demo/index.html}
+hash=$1; out=$2; cfg=${3:-}; demo=${4:-$ROOT/legacy/index.html}
 CH=$("$ROOT/tools/chrome.sh")
 T=$(mktemp -d); trap 'rm -rf "$T"' EXIT
 python3 -I "$ROOT/tools/harness.py" "$demo" "$T/a.html"

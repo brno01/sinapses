@@ -1,18 +1,40 @@
 # Sinapses
 
-Fios animados que ligam os nós de uma interface e mostram, pelo movimento, o estado de cada ligação. Cada ligação é um feixe de fios finos; cada fio tem física própria, então o feixe parece vivo sem ficar barulhento. Tudo é desenhado num único `<canvas>` 2D, sem bibliotecas.
+Fios animados que ligam os nós de uma interface e mostram, pelo movimento, o estado de cada ligação. Cada ligação é um feixe de fios finos; cada fio tem física própria, então o feixe parece vivo sem ficar barulhento. Tudo é desenhado num `<canvas>` 2D, sem dependências em tempo de execução, e a física e o desenho rodam num Web Worker para não disputar a thread principal com a interface.
 
-A demo em `demo/index.html` tem quatro nós genéricos (API, Worker, Chat, Banco), botões para cada estado e uma janela de ajustes ao vivo.
-
-## Abrir a demo
-
-Não há build nem dependências: abra o arquivo no navegador.
+## Demo
 
 ```bash
-xdg-open demo/index.html
+npm install
+npm run dev        # abre a demo em http://localhost:5173
 ```
 
-Arraste os tiles para ver o desvio e o balanço dos fios, escolha uma ligação no seletor e use os botões de estado.
+A demo tem quatro nós genéricos (API, Worker, Chat, Banco), botões para cada estado e uma janela de ajustes ao vivo. Arraste os nós para ver o desvio e o balanço dos fios. A versão original em arquivo único continua em `legacy/index.html` (abre direto no navegador) como referência de comportamento.
+
+## Usar num projeto
+
+O pacote exporta o código-fonte TypeScript (`src/index.ts`); um projeto com Vite importa direto.
+
+```ts
+import { createSinapses } from "sinapses";
+
+const s = createSinapses(canvas, {
+  nodes: { api: elApi, worker: elWorker },        // elementos (medidos a cada quadro) ou retângulos
+  links: [{ id: "api-worker", from: "api", to: "worker", strands: 9, state: "flow" }],
+  config: { nmul: 3 },                            // ajustes parciais; o resto vem do padrão
+});
+
+s.act("api-worker", "test");                      // ações: on, off, test, upd, anom, busy, flow, break, block, idle
+s.setState("api-worker", "broken");               // estado direto
+s.sequence("api-worker", [[0, "retract"], [4800, "off"], [5600, "unfurl"]]);
+s.setConfig({ life: 2 });
+s.setDragging(true);                              // um nó está sendo arrastado
+s.on("perf", ({ ms, fps }) => {});
+s.on("state", ({ id, state }) => {});
+s.destroy();
+```
+
+O canvas deve cobrir a área dos nós (as posições são relativas a ele). Com `worker: false`, tudo roda na thread principal; sem suporte a `OffscreenCanvas`, isso acontece sozinho. `s.mode` diz onde está rodando.
 
 ## Estados de uma ligação
 
@@ -26,15 +48,15 @@ Arraste os tiles para ver o desvio e o balanço dos fios, escolha uma ligação 
 | Anomalia | fios doentes se esticam até fios saudáveis, se prendem e o contágio se espalha no ponto de contato |
 | Ligando | os fios crescem dos dois nós e se encontram no meio |
 | Desligando | cada fio afina num ponto, se solta e as metades recolhem pairando |
-| Quebrada | quase todos os fios se rompem; as pontas seguem o caminho do feixe e tentam se reencontrar (quase encostam, faíscam, recuam); 2 ou 3 continuam ligados, falhando |
+| Quebrada | quase todos os fios se rompem; as pontas seguem o caminho do feixe e tentam se reencontrar; 2 ou 3 continuam ligados, falhando |
 | Bloqueada | feixe cinza com cadeado no centro; pulsos vermelhos se desfazem em faíscas antes dele |
 | Desligada | só um traço fantasma entre os nós |
 
 Quando um nó passa por cima de uma ligação, o feixe desvia até o último instante; se não há por onde passar, os fios se agarram ao nó e soltam depois.
 
-## Janela de ajustes
+## Ajustes
 
-Fica no canto direito da demo; arrasta pelo título e recolhe pela seta. Os valores ficam salvos no navegador (`localStorage`, chave `sinapses-cfg`). Duplo clique numa linha volta aquele controle ao padrão. "Copiar ajustes" copia o JSON dos valores.
+`CONTROL_SECTIONS` descreve os controles (rótulo, limites, passo) e a demo monta a janela a partir dele. Os valores ficam salvos no navegador (`sinapses-cfg`).
 
 | Grupo | Controles |
 |---|---|
@@ -43,51 +65,45 @@ Fica no canto direito da demo; arrasta pelo título e recolhe pela seta. Os valo
 | Movimento | vida própria, ondulação, comprimento da onda, balanço ao arrastar, tentáculos, desviar dos nós |
 | Física | pontos por fio (24, 36, 48 ou 64) |
 
-Presets no rodapé:
-
-- **Padrão**: 76 fios, 48 pontos por fio.
-- **Muitos fios · 60 fps**: 106 fios, 48 pontos, demais ajustes do padrão.
-
-O cabeçalho da janela mostra o custo de cada quadro e quantos quadros são desenhados por segundo.
+Presets: **Padrão** (76 fios na demo) e **Muitos fios · 60 fps** (106 fios).
 
 ## Como funciona
 
-- **Física por fio:** cada fio é uma corda de 48 nós (verlet), presa na borda dos dois nós. Uma mola puxa cada ponto para a forma-alvo: uma curva de Bézier com o deslocamento lateral do feixe (fechado nas pontas, aberto no meio). Restrições de comprimento por segmento (8 iterações por passo) mantêm a corda inteira sem zigue-zague.
-- **Forma-alvo guardada:** a forma-alvo, as normais e os comprimentos de repouso de cada fio só são recalculados quando algo de que dependem muda (pontas, direção da ligação, abertura, desvio de nós) ou quando o fio tem tentáculos. O desvio de nós também só é recalculado quando um nó se mexe.
-- **Vida própria:** cada fio sorteia rigidez, ritmo, fase e amortecimento próprios, então os fios não se mexem juntos.
-- **Estados:** os parâmetros de cada estado (rigidez, ruído, amortecimento, ritmo dos pulsos, opacidade) mudam suavemente, sem saltos. Tentáculos, contágio, rompimento e reencontro são eventos por fio.
-- **Desvio:** os outros nós empurram o feixe para o lado de menor desvio; nenhum ponto do fio entra num nó obstáculo.
-- **Desenho:** cada fio é uma fita de largura variável preenchida com gradiente, mais uma passada larga e fraca por baixo, que suaviza a borda. O canvas usa no mínimo 2× a densidade de pixels.
-- **Ritmo:** a física roda em passos fixos de 1/60 s. O desenho fica limitado a 60 quadros por segundo e cai para 30 em repouso total (janela sem foco ou nada se movendo rápido).
+- **Física por fio:** cada fio é uma corda de 48 pontos (verlet), presa na borda dos dois nós. Uma mola puxa cada ponto para a forma-alvo: uma curva de Bézier com o deslocamento lateral do feixe (fechado nas pontas, aberto no meio). Restrições de comprimento por segmento (8 iterações por passo) mantêm a corda inteira.
+- **Vida própria:** cada fio sorteia rigidez, ritmo, fase e amortecimento, então os fios não se mexem juntos.
+- **Estados:** os parâmetros de cada estado mudam suavemente, sem saltos; tentáculos, contágio, rompimento e reencontro são eventos por fio.
+- **Forma-alvo guardada:** forma-alvo, normais e comprimentos de repouso só são recalculados quando algo de que dependem muda ou quando o fio tem tentáculos. O desvio de nós também só é recalculado quando um nó se mexe.
+- **Ritmo:** a física roda em passos fixos de 1/60 s; o desenho fica limitado a 60 quadros por segundo e cai para 30 em repouso total.
+- **Worker:** `createSinapses` transfere o canvas para um Web Worker (`OffscreenCanvas`). A página só mede os nós e repassa mouse, foco e hover.
+
+## Estrutura
+
+- `src/core/` — motor sem DOM: estados, ajustes, geometria, fios, desvio, física, ligações e o `Engine`.
+- `src/render/canvas2d.ts` — desenho (fitas, pulsos, tentáculos, agarre, cadeado, esporos).
+- `src/runtime/` — laço de quadros, `Runner` (motor + desenho), protocolo e ponto de entrada do Worker.
+- `src/index.ts` — `createSinapses`, a API pública.
+- `demo/` — a demo em Vite e o modo de teste (`?test=run|panel`, relógio virtual).
+- `legacy/` — a demo original em arquivo único.
+- `test/` — Vitest: paridade com a demo original e métricas de comportamento.
+- `tools/` — harness e sondas da demo original, checagem da demo nova, varredura de custo.
 
 ## Verificação
 
-As ferramentas em `tools/` rodam a demo num Chrome headless com relógio virtual, então as medições são reproduzíveis. Elas precisam de Python 3 (só a biblioteca padrão) e de um Chrome ou Chromium: o headless shell do Playwright em `~/.cache/ms-playwright` é encontrado sozinho; em outro lugar, defina `CHROME`.
-
 ```bash
-python3 -I tools/check.py                          # verificação de regressão completa (~2 min)
-tools/probe.sh kinks.py break:10                   # uma sonda: <sonda> <ação:segundos> [ajustes-json]
-tools/probe.sh cost.py test:6 '{"nmul":3,"tdl":1}' # custo por quadro com ajustes
-tools/shot.sh break:8 out/quebra.png               # captura 1440×900
-CORES=2,3 python3 -I tools/sweep.py                # custo por quantidade de fios, com ajuste linear
+npm run typecheck
+npm test               # paridade com a demo original (15 cenários) e comportamento (dobras, ondulação, quebra, arraste, independência)
+npm run check:demo     # demo nova num Chrome headless: 11 estados sem erro, 60/30 fps, janela de ajustes, Worker de verdade
+npm run check:legacy   # demo original: a mesma bateria de sondas (~2 min)
+npm run fixtures       # regenera as assinaturas da demo original usadas na paridade
 ```
 
-| Sonda | Mede |
-|---|---|
-| `errors.py` | erros de JavaScript e custo médio por quadro |
-| `kinks.py` | dobras: maior ângulo entre segmentos e fração acima de 30° |
-| `waviness.py` | ondulação: desvio lateral e cristas por fio |
-| `tips.py` | quebra: distância entre as pontas, tentativas de reencontro, independência |
-| `sway.py` | balanço depois de arrastar um nó e tempo para assentar |
-| `independence.py` | quanto cada fio se mexe sozinho em uso |
-| `cost.py` | custo por quadro: layout, desvio, física e desenho |
-| `positions.py` | impressão digital das posições (para otimizações que não podem mudar nada) |
-| `fps.py` | desenhos e passos por segundo num monitor simulado (`HZ`, `FOCUS`) |
-| `panel.py` | controles, presets e encaixe da janela de ajustes |
+As checagens de navegador usam um Chrome ou Chromium headless: o headless shell do Playwright em `~/.cache/ms-playwright` é encontrado sozinho; em outro lugar, defina `CHROME`. A checagem do Worker usa o Playwright para Python via `uv`.
+
+A paridade compara cada fio por uma assinatura (somas das posições) com tolerância de 0,001: `Math.exp`, `sin`, `cos` e `atan2` diferem no último bit entre o V8 do Chrome e o do Node, então a igualdade bit a bit entre ambientes não existe. Um erro de porta aparece com diferença de unidades ou dezenas.
 
 ## Desempenho
 
-Custo por quadro, medido num notebook com CPU Intel de 13ª geração, preso nos núcleos rápidos, Chrome headless sem GPU (menor tempo de 5 rodadas):
+Custo por quadro, medido num notebook com CPU Intel de 13ª geração, preso nos núcleos rápidos, Chrome headless sem GPU (menor tempo de 5 rodadas, `CORES=2,3 python3 -I tools/sweep.py`):
 
 | Fios | Em uso | Anomalia | Testando |
 |---|---|---|---|
@@ -96,13 +112,11 @@ Custo por quadro, medido num notebook com CPU Intel de 13ª geração, preso nos
 | 106 | 4,4 ms | 6,4 ms | 8,7 ms |
 | 120 | 5,0 ms | 7,0 ms | 10,3 ms |
 
-Cada fio custa ~0,04 ms por quadro em uso e ~0,09 ms em teste; no teste, ~70% do custo é desenho. Para manter 60 quadros por segundo com folga (≤ 12 ms), cabem ~140 fios no estado mais pesado. Os números variam com a carga da máquina: compare versões sempre na mesma sessão (`tools/sweep.py`). Com GPU, o desenho costuma custar menos.
+No teste, ~70% do custo é desenho. Com o Worker, esse custo sai da thread principal. Os números variam com a carga da máquina: compare versões sempre na mesma sessão.
 
 ## Próximos passos
 
-- Separar o motor em TypeScript, com uma API do tipo `createSinapses(canvas, { nodes, links })` e `link.setState("broken")`, e transformar as sondas em testes.
-- Rodar física e desenho num Web Worker com `OffscreenCanvas`.
-- Um componente React que receba nós e estados por props.
+- Um componente React fino em volta de `createSinapses`.
 
 ## Licença
 
