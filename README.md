@@ -46,13 +46,14 @@ Fica no canto direito da demo; arrasta pelo título e recolhe pela seta. Os valo
 Presets no rodapé:
 
 - **Padrão**: 76 fios, 48 pontos por fio.
-- **Muitos fios · 60 fps**: 90 fios, 48 pontos, tentáculos em 100%.
+- **Muitos fios · 60 fps**: 106 fios, 48 pontos, demais ajustes do padrão.
 
 O cabeçalho da janela mostra o custo de cada quadro e quantos quadros são desenhados por segundo.
 
 ## Como funciona
 
-- **Física por fio:** cada fio é uma corda de 48 nós (verlet), presa na borda dos dois nós. Uma mola puxa cada ponto para a forma-alvo: uma curva de Bézier com o deslocamento lateral do feixe (fechado nas pontas, aberto no meio). Restrições de comprimento por segmento mantêm a corda inteira sem zigue-zague.
+- **Física por fio:** cada fio é uma corda de 48 nós (verlet), presa na borda dos dois nós. Uma mola puxa cada ponto para a forma-alvo: uma curva de Bézier com o deslocamento lateral do feixe (fechado nas pontas, aberto no meio). Restrições de comprimento por segmento (8 iterações por passo) mantêm a corda inteira sem zigue-zague.
+- **Forma-alvo guardada:** a forma-alvo, as normais e os comprimentos de repouso de cada fio só são recalculados quando algo de que dependem muda (pontas, direção da ligação, abertura, desvio de nós) ou quando o fio tem tentáculos. O desvio de nós também só é recalculado quando um nó se mexe.
 - **Vida própria:** cada fio sorteia rigidez, ritmo, fase e amortecimento próprios, então os fios não se mexem juntos.
 - **Estados:** os parâmetros de cada estado (rigidez, ruído, amortecimento, ritmo dos pulsos, opacidade) mudam suavemente, sem saltos. Tentáculos, contágio, rompimento e reencontro são eventos por fio.
 - **Desvio:** os outros nós empurram o feixe para o lado de menor desvio; nenhum ponto do fio entra num nó obstáculo.
@@ -86,21 +87,20 @@ CORES=2,3 python3 -I tools/sweep.py                # custo por quantidade de fio
 
 ## Desempenho
 
-Medido num notebook com CPU Intel de 13ª geração, preso nos núcleos rápidos, Chrome headless sem GPU (menor tempo de 5 rodadas):
+Custo por quadro, medido num notebook com CPU Intel de 13ª geração, preso nos núcleos rápidos, Chrome headless sem GPU (menor tempo de 5 rodadas):
 
 | Fios | Em uso | Anomalia | Testando |
 |---|---|---|---|
-| 30 | 3,3 ms | 4,4 ms | 5,3 ms |
-| 60 | 5,7 ms | 7,5 ms | 9,3 ms |
-| 75 | 7,1 ms | 10,0 ms | 10,9 ms |
-| 90 | 8,3 ms | 11,4 ms | 13,3 ms |
+| 76 | 3,1 ms | 4,8 ms | 6,1 ms |
+| 90 | 3,8 ms | 5,4 ms | 7,3 ms |
+| 106 | 4,4 ms | 6,4 ms | 8,7 ms |
+| 120 | 5,0 ms | 7,0 ms | 10,3 ms |
 
-Cada fio custa ~0,08 ms por quadro em uso e ~0,13 ms em teste. Com GPU, o desenho costuma custar menos.
+Cada fio custa ~0,04 ms por quadro em uso e ~0,09 ms em teste; no teste, ~70% do custo é desenho. Para manter 60 quadros por segundo com folga (≤ 12 ms), cabem ~140 fios no estado mais pesado. Os números variam com a carga da máquina: compare versões sempre na mesma sessão (`tools/sweep.py`). Com GPU, o desenho costuma custar menos.
 
 ## Próximos passos
 
 - Separar o motor em TypeScript, com uma API do tipo `createSinapses(canvas, { nodes, links })` e `link.setState("broken")`, e transformar as sondas em testes.
-- Guardar a forma-alvo entre quadros quando nada se mexe.
 - Rodar física e desenho num Web Worker com `OffscreenCanvas`.
 - Um componente React que receba nós e estados por props.
 

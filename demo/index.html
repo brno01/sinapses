@@ -89,7 +89,7 @@ function geoC(c,dt){const el=id=>document.getElementById(id).getBoundingClientRe
  const spd=c.pA?(Math.hypot(m.A.x-c.pA[0],m.A.y-c.pA[1])+Math.hypot(m.B.x-c.pB[0],m.B.y-c.pB[1]))/Math.max(dt,1e-3):0;c.pA=[m.A.x,m.A.y];c.pB=[m.B.x,m.B.y];c.mv+=(Math.min(spd,2000)-c.mv)*(1-Math.exp(-dt*(spd>c.mv?14:4)));
  avoid(c,dt,m);ease(c,dt)}
 // desvio de obstáculos: os outros tiles empurram o feixe para o lado de menor desvio; se não há por onde desviar, os fios tentam se agarrar ao tile
-function avoid(c,dt,m){const K=96,A=m.A,B=m.B;let Tx=B.x-A.x,Ty=B.y-A.y;const Lc=Math.hypot(Tx,Ty)||1;Tx/=Lc;Ty/=Lc;const Nx=-Ty,Ny=Tx;c.nx=Nx;c.ny=Ny;c.dv.fill(0);if(!CFG.avd){c.ob={};c.gr=false;c.dvAct=0;return}
+function avoid(c,dt,m){const K=96,A=m.A,B=m.B;let Tx=B.x-A.x,Ty=B.y-A.y;const Lc=Math.hypot(Tx,Ty)||1;Tx/=Lc;Ty/=Lc;const Nx=-Ty,Ny=Tx;c.nx=Nx;c.ny=Ny;c.dv.fill(0);if(!CFG.avd){c.ob={};c.gr=false;c.dvAct=0;dvBump(c);return}
  // a geometria do desvio só é recalculada quando a ligação ou algum tile muda de lugar; parado, reaproveita o resultado guardado (a suavização do lado e do agarre continua rodando)
  const hw=22,mg=16,gs=[],key=[A.x,A.y,A.nx,A.ny,B.x,B.y,B.nx,B.ny];for(const g of document.querySelectorAll('.g')){if(g.id===c.a||g.id===c.b)continue;const r=g.getBoundingClientRect();gs.push([g,r]);key.push(r.left,r.top,r.right,r.bottom)}
  const same=!!c.ak&&c.ak.length===key.length&&key.every((v,i)=>v===c.ak[i]);c.ak=key;let P=null;
@@ -106,7 +106,9 @@ function avoid(c,dt,m){const K=96,A=m.A,B=m.B;let Tx=B.x-A.x,Ty=B.y-A.y;const Lc
   const{dp,dn,Dp,Dn,hit,blocked}=o.geo;if(hit){if(Dp<Dn-12)o.tgt=1;else if(Dn<Dp-12)o.tgt=-1}
   o.v+=(o.tgt-o.v)*(1-Math.exp(-dt*6));o.g+=((blocked?1:0)-o.g)*(1-Math.exp(-dt*4));
   const wgt=1-o.g;for(let k=0;k<=K;k++){const u=k/K,e=sm(clamp(u/.025))*sm(clamp((1-u)/.025));c.dv[k]+=wgt*e*((1+o.v)/2*dp[k]-(1-o.v)/2*dn[k])}}
- c.gr=Object.values(c.ob).some(o=>o.g>.04);let mx=0;for(let k=0;k<=K;k++)mx=Math.max(mx,Math.abs(c.dv[k]));c.dvAct+=(clamp(mx/30)-c.dvAct)*(1-Math.exp(-dt*8))}
+ c.gr=Object.values(c.ob).some(o=>o.g>.04);let mx=0;for(let k=0;k<=K;k++)mx=Math.max(mx,Math.abs(c.dv[k]));c.dvAct+=(clamp(mx/30)-c.dvAct)*(1-Math.exp(-dt*8));dvBump(c)}
+// número de versão do desvio da ligação: sobe só quando algum valor muda (a forma-alvo guardada dos fios depende dele)
+function dvBump(c){const p=c.dvP||(c.dvP=new Float32Array(97));for(let k=0;k<97;k++)if(p[k]!==c.dv[k]){p.set(c.dv);c.dvVer=(c.dvVer||0)+1;return}}
 function grips(c,s,time){for(const id in c.ob){const o=c.ob[id];if(o.g<.04)continue;const r=o.rect,ins=(x,y)=>x>r.left&&x<r.right&&y>r.top&&y<r.bottom;
   for(let j=0;j<NP-1;j++){const a=ins(s.dx[j],s.dy[j]),b=ins(s.dx[j+1],s.dy[j+1]);if(a===b)continue;let lo=[s.dx[j],s.dy[j]],hi=[s.dx[j+1],s.dy[j+1]];
    for(let it=0;it<7;it++){const md=[(lo[0]+hi[0])/2,(lo[1]+hi[1])/2];if(ins(md[0],md[1])===a)lo=md;else hi=md}
@@ -135,7 +137,7 @@ function target(s,u,notd){const p=bz(s,u),q=bz(s,Math.min(1,u+.01)),r=bz(s,Math.
  const cc=s.cc,fu=clamp(u)*96,i0=Math.min(95,Math.floor(fu)),D=lerp(cc.dv[i0],cc.dv[i0+1],fu-i0),dX=cc.nx*D,dY=cc.ny*D;
  if(to){const nw=Math.max(1,to[5]);return[p[0]-ty/L*(off+to[0])+tx/L*to[1]+dX+to[3]/nw,p[1]+tx/L*(off+to[0])+ty/L*to[1]+dY+to[4]/nw]}
  return[p[0]-ty/L*off+dX,p[1]+tx/L*off+dY]}
-function reset(s){for(let j=0;j<NP;j++){const t=target(s,j/(NP-1));s.x[j]=s.px[j]=t[0];s.y[j]=s.py[j]=t[1];s.alive[j]=true;s.ax[j]=s.bx[j]=t[0];s.ay[j]=s.by[j]=t[1]}s.cut=-1;s.contract=0;s.met=0;s.init=true}
+function reset(s){for(let j=0;j<NP;j++){const t=target(s,j/(NP-1));s.x[j]=s.px[j]=t[0];s.y[j]=s.py[j]=t[1];s.alive[j]=true;s.ax[j]=s.bx[j]=t[0];s.ay[j]=s.by[j]=t[1]}s.cut=-1;s.contract=0;s.met=0;s.init=true;s.tok=false}
 const cutIdx=(s,st)=>clamp(Math.round((st==='broken'?.42+s.cutF*.2:s.cutF)*(NP-1)),6,NP-9);
 // folga entre as pontas de um fio quebrado: abre no rompimento; depois, a cada tentativa, as pontas se aproximam, quase encostam, falham e recuam um pouco (cada tentativa chega a uma distância diferente; o tremor fica só na ponta, no passo da física)
 const hsh=(a,b)=>fr(Math.sin(a*12.9898+b*78.233)*43758.5453);
@@ -148,14 +150,19 @@ function step(c,time,dt){const st=c.st,ts=time-c.t0;TN=time;for(const s of c.str
   if(s.cut<0&&(st==='retract'||st==='broken')&&ts>cdt&&!(st==='broken'&&s.keep)){const k=cutIdx(s,st);s.cut=k;s.alive[k]=false;s.cutT=time;for(let j=0;j<NP;j++){const isA=j<=k,an=isA?s.A:s.B,f=(isA?j:NP-1-j)/Math.max(1,isA?k:NP-2-k),vx=an.x-s.x[j],vy=an.y-s.y[j],L=Math.hypot(vx,vy)||1,mag=(st==='broken'?.06:.2)*s.rec*Math.pow(f,1.5);s.px[j]=s.x[j]-vx/L*mag;s.py[j]=s.y[j]-vy/L*mag}}
   // comprimento de repouso de cada segmento = distância entre nós vizinhos da forma-alvo (o espaçamento do alvo não é uniforme; um comprimento único forçava zigue-zague junto aos tiles)
   const rl=s.rl||(s.rl=new Float64Array(NP-1)),brk=st==='broken'&&s.cut>=0;
-  if(brk){
+  if(brk){s.tok=false;
    // quebrada: cada metade segue o caminho do feixe intacto até perto do corte; a folga entre as pontas abre e fecha (as metades tentam se reencontrar)
    const TX=s.tgx||(s.tgx=new Float64Array(NP)),TY=s.tgy||(s.tgy=new Float64Array(NP)),k=s.cut,g=brGap(s,time),wA=.5+.22*Math.sin(time*.37+s.ph[0]),um=(k+.5)/(NP-1),Lt=s.Lt||c.g.L,uA=Math.max(.05,um-g*wA/Lt),uB=Math.min(.95,um+g*(1-wA)/Lt);s.gap=g;
    for(let j=0;j<NP;j++){const t=target(s,j<=k?j/k*uA:uB+(j-k-1)/(NP-2-k)*(1-uB));TX[j]=t[0];TY[j]=t[1]}
    let sl=0;for(let j=0;j<NP-1;j++){const d=Math.hypot(TX[j+1]-TX[j],TY[j+1]-TY[j]);sl+=d;rl[j]=j===k?0:d}s.Lt=sl}
   else{
-   // a forma-alvo de cada nó é calculada uma vez por passo e reaproveitada na força da mola, logo abaixo (antes era calculada duas vezes)
-   const TX=s.tgx||(s.tgx=new Float64Array(NP)),TY=s.tgy||(s.tgy=new Float64Array(NP));let tp=target(s,0),sl=0;TX[0]=tp[0];TY[0]=tp[1];for(let j=1;j<NP;j++){const t=target(s,j/(NP-1));TX[j]=t[0];TY[j]=t[1];rl[j-1]=Math.hypot(t[0]-tp[0],t[1]-tp[1]);sl+=rl[j-1];tp=t}s.Lt=sl}
+   // forma-alvo de cada nó (posição, normal e comprimentos de repouso): calculada uma vez e reaproveitada nos passos seguintes enquanto
+   // nada de que ela depende muda (pontas do fio, direção da ligação, abertura e início do feixe, desvio de tiles) e o fio não tem tentáculos
+   const A=s.A,B=s.B,cc=s.cc,K=s.tkey||(s.tkey=new Float64Array(13)),kv=[A.x,A.y,A.nx,A.ny,B.x,B.y,B.nx,B.ny,CFG.spr,CFG.ops,cc.dvVer||0,cc.nx,cc.ny];
+   let ok=s.tok&&!s.td.length;if(ok)for(let q=0;q<13;q++)if(K[q]!==kv[q]){ok=false;break}
+   if(!ok){const TX=s.tgx||(s.tgx=new Float64Array(NP)),TY=s.tgy||(s.tgy=new Float64Array(NP)),NX=s.tnx||(s.tnx=new Float64Array(NP)),NY=s.tny||(s.tny=new Float64Array(NP));let tp=target(s,0),sl=0;TX[0]=tp[0];TY[0]=tp[1];for(let j=1;j<NP;j++){const t=target(s,j/(NP-1));TX[j]=t[0];TY[j]=t[1];rl[j-1]=Math.hypot(t[0]-tp[0],t[1]-tp[1]);sl+=rl[j-1];tp=t}s.Lt=sl;
+    for(let j=1;j<NP-1;j++){const u=j/(NP-1),q1=bz(s,Math.min(1,u+.01)),q0=bz(s,Math.max(0,u-.01)),tl=Math.hypot(q1[0]-q0[0],q1[1]-q0[1])||1;NX[j]=-(q1[1]-q0[1])/tl;NY[j]=(q1[0]-q0[0])/tl}
+    K.set(kv);s.tok=!s.td.length}}
   const cA=s.cA||(s.cA=new Float64Array(NP)),cB=s.cB||(s.cB=new Float64Array(NP));for(let k=1;k<NP;k++){cA[k]=cA[k-1]+rl[k-1];cB[k]=cB[k-1]+rl[NP-1-k]}
   s.td=s.td.filter(e=>time-e.t0<=e.dur);s.inf=s.inf.filter(f=>time-f.t0<f.hold+2.2);
   for(const e of s.td)if(e.tk!=null&&!e.cd&&(time-e.t0)/e.dur>e.rt){e.cd=1;const h=s.cc.strands[e.tk];h.inf.push({uc:e.uc,t0:time,hold:(e.hd-e.rt)*e.dur,w:.05+.05*s.rnd()});h.rip=time}
@@ -176,7 +183,7 @@ function step(c,time,dt){const st=c.st,ts=time-c.t0;TN=time;for(const s of c.str
      wv=Wp*(Math.sin(time*s.wf[0]*3-f*s.wk[0]*TAU+s.ph[0])+.5*Math.sin(time*s.wf[1]*3.7-f*s.wk[1]*TAU+s.ph[1]));
     fx=kp*(Tx-s.x[j])+kp*wv*an.tx;fy=kp*(Ty-s.y[j])+kp*wv*an.ty;
     const dd=lerp(lerp(.93,s.fd,clamp((time-s.cutT)/1.4)),.84,clamp(c.mv/200)),vx=(s.x[j]-s.px[j])*dd,vy=(s.y[j]-s.py[j])*dd;s.px[j]=s.x[j];s.py[j]=s.y[j];s.x[j]+=vx+fx;s.y[j]+=vy+fy;continue}
-   const T=[s.tgx[j],s.tgy[j]],q1=bz(s,Math.min(1,u+.01)),q0=bz(s,Math.max(0,u-.01)),tl=Math.hypot(q1[0]-q0[0],q1[1]-q0[1])||1,nx=-(q1[1]-q0[1])/tl,ny=(q1[0]-q0[0])/tl;
+   const T=[s.tgx[j],s.tgy[j]],nx=s.tnx[j],ny=s.tny[j];
    const tdv=s.td.length?tdOff(s,u,time):null,act=tdv?tdv[2]:0,wt=tdv?Math.min(1,tdv[5]):0,ksj=c.ks*lerp(1+(s.stf-1)*Math.min(1,CFG.life),1,mvk)*(1+2.2*Math.min(1,act))*(1+4*wt)*(1+1.5*mvk/CFG.sway)*(1+2*c.dvAct),dl=lerp(dmpm,.7,wt);fx+=(T[0]-s.x[j])*ksj;fy+=(T[1]-s.y[j])*ksj;
    const env=Math.pow(Math.sin(Math.PI*u),1.2),Ap=c.nz*8*s.wa*env*ksj*CFG.life*CFG.wav,wv=Ap*(Math.sin(time*s.wf[0]*3-u*s.wk[0]/CFG.wln*TAU+s.ph[0])+.5*Math.sin(time*s.wf[1]*3.7-u*s.wk[1]/CFG.wln*TAU+s.ph[1]));fx+=nx*wv;fy+=ny*wv;if(st==='broken'&&s.keep){const jj=.03*CFG.life*Math.sin(Math.PI*u)*Math.sin(time*11+u*14+s.ph[0])*(.5+.5*Math.sin(time*1.7+s.ph[1]));fx+=nx*jj;fy+=ny*jj}
    // ondulação suave em mudança de estado: percorre o feixe e se apaga
@@ -185,7 +192,7 @@ function step(c,time,dt){const st=c.st,ts=time-c.t0;TN=time;for(const s of c.str
    if(ptr.on&&!dragging){const ddx=s.x[j]-ptr.x,ddy=s.y[j]-ptr.y,d2=ddx*ddx+ddy*ddy;if(d2<4900){const d=Math.sqrt(d2)||1,kk=1-d/70;fx+=ddx/d*kk*kk*.5;fy+=ddy/d*kk*kk*.5}}
    const vx=(s.x[j]-s.px[j])*dl,vy=(s.y[j]-s.py[j])*dl;s.px[j]=s.x[j];s.py[j]=s.y[j];s.x[j]+=vx+fx;s.y[j]+=vy+fy}
   s.x[0]=s.A.x;s.y[0]=s.A.y;s.x[NP-1]=s.B.x;s.y[NP-1]=s.B.y;
-  for(let it=0;it<(free?10:16);it++){for(let j=0;j<NP-1;j++){if(!s.alive[j])continue;const dx=s.x[j+1]-s.x[j],dy=s.y[j+1]-s.y[j],d=Math.hypot(dx,dy)||1e-6,diff=(d-rl[j])/d;let w0=j===0?0:.5,w1=j+1===NP-1?0:.5;if(j===0)w1=1;if(j+1===NP-1)w0=1;
+  for(let it=0;it<(free?10:8);it++){for(let j=0;j<NP-1;j++){if(!s.alive[j])continue;const dx=s.x[j+1]-s.x[j],dy=s.y[j+1]-s.y[j],d=Math.hypot(dx,dy)||1e-6,diff=(d-rl[j])/d;let w0=j===0?0:.5,w1=j+1===NP-1?0:.5;if(j===0)w1=1;if(j+1===NP-1)w0=1;
     s.x[j]+=dx*diff*w0;s.y[j]+=dy*diff*w0;s.x[j+1]-=dx*diff*w1;s.y[j+1]-=dy*diff*w1}
    s.x[0]=s.A.x;s.y[0]=s.A.y;s.x[NP-1]=s.B.x;s.y[NP-1]=s.B.y}
   if(!free)for(const id in c.ob){const o=c.ob[id];if(o.g>.5||!o.rect)continue;const r=o.rect,e=5,L0=r.left-e,R0=r.right+e,T0=r.top-e,B0=r.bottom+e,sg=o.v>=0?1:-1;
@@ -302,8 +309,9 @@ const SPEC=[['Pulsos',[['pspd','Velocidade',.3,3,pct],['pfrq','Frequência',.3,3
  ['Fios',[['nmul','Quantidade',.3,5,()=>total()+' fios'],['wid','Espessura',.4,2.5,pct],['spr','Abertura',0,2,pct],['ops','Início',0,.4,pct,'Onde o feixe começa a se abrir, contando de cada tile.'],['glo','Brilho',.3,1.6,pct],['sat','Saturação',0,2,pct]]],
  ['Movimento',[['life','Vida própria',0,5,pct,'Em 0%, o feixe anda junto, como um traço só.'],['wav','Ondulação',0,3,pct],['wln','Comprimento',.4,6,pct,'Altura e comprimento das ondas ao longo de cada fio.'],['sway','Balanço',.3,3,pct],['tdl','Tentáculos',0,2,pct]]]];
 const RANGES=SPEC.flatMap(s=>s[1]);
-// presets: "Muitos fios · 60 fps" é o padrão com 90 fios (Quantidade 300%) e tentáculos em 100%; medido num notebook Intel de 13ª geração, núcleo rápido, sem GPU: ~8 ms em uso, ~10–11 ms em atualização e anomalia, ~12–13 ms testando
-const PRESETS={padrao:{...CFG_DEF},muitos:{...CFG_DEF,nmul:3,tdl:1}};
+// presets: "Muitos fios · 60 fps" é o padrão com 106 fios (Quantidade 350%); medido num notebook Intel de 13ª geração, núcleo rápido, sem GPU:
+// ~4,4 ms em uso, ~6,4 ms na anomalia e ~8,7 ms testando (o estado mais pesado), com folga para a máquina ocupada
+const PRESETS={padrao:{...CFG_DEF},muitos:{...CFG_DEF,nmul:3.5}};
 function saveCfg(){try{localStorage.setItem('sinapses-cfg',JSON.stringify(CFG))}catch(e){}}
 function rebuild(all){for(const c of C){const n=nOf(c.n0);if(all||n!==c.ns){c.ns=n;mkS(c)}}}
 function syncCfg(){document.documentElement.style.setProperty('--sat',CFG.sat);const pk=Object.keys(PRESETS).find(k=>Object.keys(CFG_DEF).every(f=>PRESETS[k][f]===CFG[f]));document.getElementById('cfgPre').value=pk||'custom';for(const[k,,mn,mx,f]of RANGES){const el=document.getElementById('c_'+k);el.value=CFG[k];el.style.setProperty('--p',((CFG[k]-mn)/(mx-mn)*100)+'%');document.getElementById('o_'+k).textContent=f(CFG[k]);el.closest('.row').classList.toggle('mod',Math.abs(CFG[k]-CFG_DEF[k])>1e-6)}

@@ -64,7 +64,7 @@ check("fios em uso se mexem sozinhos (correlação ≤ 0,3)", "falhou" not in i 
 p = probe("panel.py", "flow:2", "")
 check("painel: controles, presets e janela cabendo em 900 px",
       "falhou" not in p and p["inicio"]["preset"] == "padrao" and p["quantidade"]["fios"] == 30
-      and p["pontos"]["nos"] == 24 and p["muitos"]["fios"] == 90 and p["padrao"]["igual"]
+      and p["pontos"]["nos"] == 24 and p["muitos"]["fios"] == 106 and p["padrao"]["igual"]
       and p["janela"]["fimPx"] <= 900 and p["janela"]["conteudo"] <= p["janela"]["visivel"], p)
 
 f1 = probe("fps.py", "flow:8", env={"HZ": "144"})
