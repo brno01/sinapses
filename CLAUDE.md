@@ -16,7 +16,8 @@
 | Instalar | `npm install` |
 | Demo (dev) | `npm run dev` |
 | Typecheck | `npm run typecheck` |
-| Testes (paridade + comportamento) | `npm test` |
+| Testes (paridade, comportamento, React, tipos) | `npm test` |
+| Regenerar os tipos publicados (`types/`) | `npm run types` |
 | Build | `npm run build` |
 | Demo nova no navegador | `npm run check:demo` |
 | Demo original no navegador (~2 min) | `npm run check:legacy` |
@@ -25,7 +26,8 @@
 
 ## Estrutura
 - `src/core/` — motor sem DOM (Node, Worker ou thread principal). `Engine` recebe tempo em ms.
-- `src/render/canvas2d.ts` — desenho; `src/runtime/` — laço, `Runner`, protocolo e Worker; `src/index.ts` — API.
+- `src/render/canvas2d.ts` — desenho; `src/runtime/` — laço, `Runner`, protocolo e Worker; `src/index.ts` — API; `src/react.ts` — componente React (`sinapses/react`).
+- `types/` — declarações geradas e versionadas; o `exports` aponta os tipos para cá (quem usa não checa `src/` com as próprias regras). Mudou a API: `npm run types`.
 - `demo/` — página Vite; `?test=run|panel` roda com relógio virtual na thread principal; `?smoke=<ms>` relata o Worker.
 - `legacy/index.html` — demo original em arquivo único: referência de comportamento.
 - `test/` — `parity.test.ts` (assinaturas da demo original em `test/fixtures/`) e `metrics.test.ts`.

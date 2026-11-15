@@ -36,6 +36,28 @@ s.destroy();
 
 O canvas deve cobrir a área dos nós (as posições são relativas a ele). Com `worker: false`, tudo roda na thread principal; sem suporte a `OffscreenCanvas`, isso acontece sozinho. `s.mode` diz onde está rodando.
 
+### Em React (`sinapses/react`)
+
+```ts
+import { SinapsesCanvas } from "sinapses/react";
+
+<SinapsesCanvas
+  className="camada"                       // a caixa ocupa o espaço que o estilo der; o canvas a preenche
+  nodes={(id) => refs.current.get(id)}     // mapa id → elemento/retângulo, ou função chamada depois da montagem
+  links={links}                            // ligação com ponta sem nó fica de fora
+  states={{ "api-worker": "broken" }}      // muda o estado sem recriar o motor
+  config={{ sat: 0.9 }}                    // ajustes; `nmul` e `np` recriam
+  still={reduzirMovimento}                 // quadro parado: assenta e desenha um quadro; de novo só quando algo muda
+/>
+```
+
+- O motor (e o canvas, que vira `OffscreenCanvas` uma vez só) é recriado quando muda a estrutura: pontas, quantidade de fios, semente, espaçamento, `nmul`, `np`, `still` ou `worker` (`structureKey`). Estado e demais ajustes passam sem recriar.
+- O canvas é criado dentro de um efeito, então funciona no `StrictMode`.
+- `still` usa o relógio manual: bom para `prefers-reduced-motion: reduce`. Redesenha quando muda o estado, os ajustes ou o tamanho do canvas ou de um nó.
+- `react` é dependência opcional (peer). Sem JSX no componente: não exige configuração de compilação.
+
+O pacote aponta os tipos para `types/` (condição `types` do `exports`): projetos com regras de TypeScript mais estritas não checam o código-fonte. Mudou a API? `npm run types` (o teste `types.test.ts` acusa tipos velhos).
+
 ## Estados de uma ligação
 
 | Estado | O que os fios fazem |
@@ -81,7 +103,8 @@ Presets: **Padrão** (76 fios na demo) e **Muitos fios · 60 fps** (106 fios).
 - `src/core/` — motor sem DOM: estados, ajustes, geometria, fios, desvio, física, ligações e o `Engine`.
 - `src/render/canvas2d.ts` — desenho (fitas, pulsos, tentáculos, agarre, cadeado, esporos).
 - `src/runtime/` — laço de quadros, `Runner` (motor + desenho), protocolo e ponto de entrada do Worker.
-- `src/index.ts` — `createSinapses`, a API pública.
+- `src/index.ts` — `createSinapses`, a API pública; `src/react.ts` — `SinapsesCanvas` (subpath `sinapses/react`).
+- `types/` — declarações geradas (`npm run types`), lidas por quem usa o pacote.
 - `demo/` — a demo em Vite e o modo de teste (`?test=run|panel`, relógio virtual).
 - `legacy/` — a demo original em arquivo único.
 - `test/` — Vitest: paridade com a demo original e métricas de comportamento.
@@ -91,7 +114,8 @@ Presets: **Padrão** (76 fios na demo) e **Muitos fios · 60 fps** (106 fios).
 
 ```bash
 npm run typecheck
-npm test               # paridade com a demo original (15 cenários) e comportamento (dobras, ondulação, quebra, arraste, independência)
+npm run types         # regenera types/ depois de mudar a API
+npm test               # componente React, tipos publicados, com a demo original (15 cenários) e comportamento (dobras, ondulação, quebra, arraste, independência)
 npm run check:demo     # demo nova num Chrome headless: 11 estados sem erro, 60/30 fps, janela de ajustes, Worker de verdade
 npm run check:legacy   # demo original: a mesma bateria de sondas (~2 min)
 npm run fixtures       # regenera as assinaturas da demo original usadas na paridade
@@ -116,7 +140,8 @@ No teste, ~70% do custo é desenho. Com o Worker, esse custo sai da thread princ
 
 ## Próximos passos
 
-- Um componente React fino em volta de `createSinapses`.
+- Paleta de estados configurável (hoje `STATE_COLORS` é fixo).
+- Acrescentar e remover ligações sem recriar o motor.
 
 ## Licença
 
