@@ -45,13 +45,14 @@ import { SinapsesCanvas } from "sinapses/react";
   className="camada"                       // a caixa ocupa o espaço que o estilo der; o canvas a preenche
   nodes={(id) => refs.current.get(id)}     // mapa id → elemento/retângulo, ou função chamada depois da montagem
   links={links}                            // ligação com ponta sem nó fica de fora
+  obstacles={outrosIds}                    // outros nós de que os fios desviam (sem ligação própria)
   states={{ "api-worker": "broken" }}      // muda o estado sem recriar o motor
   config={{ sat: 0.9 }}                    // ajustes; `nmul` e `np` recriam
   still={reduzirMovimento}                 // quadro parado: assenta e desenha um quadro; de novo só quando algo muda
 />
 ```
 
-- O motor (e o canvas, que vira `OffscreenCanvas` uma vez só) é recriado quando muda a estrutura: pontas, quantidade de fios, semente, espaçamento, `nmul`, `np`, `still` ou `worker` (`structureKey`). Estado e demais ajustes passam sem recriar.
+- O motor (e o canvas, que vira `OffscreenCanvas` uma vez só) é recriado quando muda a estrutura: pontas, quantidade de fios, semente, espaçamento, obstáculos, `nmul`, `np`, `still` ou `worker` (`structureKey`). Estado e demais ajustes passam sem recriar.
 - O canvas é criado dentro de um efeito, então funciona no `StrictMode`.
 - `still` usa o relógio manual: bom para `prefers-reduced-motion: reduce`. Redesenha quando muda o estado, os ajustes ou o tamanho do canvas ou de um nó.
 - `react` é dependência opcional (peer). Sem JSX no componente: não exige configuração de compilação.

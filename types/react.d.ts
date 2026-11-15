@@ -8,6 +8,11 @@ export interface SinapsesCanvasProps {
      */
     nodes: NodeSource;
     links: LinkDef[];
+    /**
+     * Outros nós (ids resolvidos por `nodes`) de que os fios desviam, sem ligação própria. Sem isto, um feixe passa por
+     * cima de qualquer elemento que não seja ponta de ligação.
+     */
+    obstacles?: readonly string[];
     /** Estado atual de cada ligação; mudar aqui não recria o motor. */
     states?: Record<string, LinkState>;
     config?: Partial<Config>;
@@ -34,6 +39,7 @@ export declare function structureKey(links: readonly LinkDef[], opts?: {
     still?: boolean;
     worker?: boolean;
     config?: Partial<Config>;
+    obstacles?: readonly string[];
 }): string;
 /** Caixa com o canvas das ligações. Ocupa o espaço que o estilo der; os nós são medidos em relação ao canvas. */
 export declare function SinapsesCanvas(props: SinapsesCanvasProps): ReactElement;

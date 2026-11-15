@@ -11,6 +11,11 @@ export interface SinapsesCanvasProps {
    */
   nodes: NodeSource;
   links: LinkDef[];
+  /**
+   * Outros nós (ids resolvidos por `nodes`) de que os fios desviam, sem ligação própria. Sem isto, um feixe passa por
+   * cima de qualquer elemento que não seja ponta de ligação.
+   */
+  obstacles?: readonly string[];
   /** Estado atual de cada ligação; mudar aqui não recria o motor. */
   states?: Record<string, LinkState>;
   config?: Partial<Config>;
@@ -39,10 +44,14 @@ const STRUCTURAL: (keyof Config)[] = ["nmul", "np"];
  * Chave da estrutura: muda quando é preciso recriar o motor (e o canvas, que só vira OffscreenCanvas uma vez).
  * Ordem das ligações não importa; estado não entra.
  */
-export function structureKey(links: readonly LinkDef[], opts: { still?: boolean; worker?: boolean; config?: Partial<Config> } = {}): string {
+export function structureKey(
+  links: readonly LinkDef[],
+  opts: { still?: boolean; worker?: boolean; config?: Partial<Config>; obstacles?: readonly string[] } = {},
+): string {
   const ls = links.map((l) => [l.id, l.from, l.to, l.strands, l.spacing ?? null, l.seed ?? null]).sort((a, b) => String(a[0]).localeCompare(String(b[0])));
   const cfg = STRUCTURAL.map((k) => opts.config?.[k] ?? null);
-  return JSON.stringify([ls, cfg, !!opts.still, opts.worker ?? null]);
+  const obs = [...new Set(opts.obstacles ?? [])].sort();
+  return JSON.stringify([ls, cfg, !!opts.still, opts.worker ?? null, obs]);
 }
 
 function resolve(nodes: NodeSource, id: string): HTMLElement | Rect | null {
@@ -52,8 +61,8 @@ function resolve(nodes: NodeSource, id: string): HTMLElement | Rect | null {
 
 /** Caixa com o canvas das ligações. Ocupa o espaço que o estilo der; os nós são medidos em relação ao canvas. */
 export function SinapsesCanvas(props: SinapsesCanvasProps): ReactElement {
-  const { links, still, worker, config, className, style } = props;
-  const key = structureKey(links, { still, worker, config });
+  const { links, still, worker, config, obstacles, className, style } = props;
+  const key = structureKey(links, { still, worker, config, obstacles });
   const boxRef = useRef<HTMLDivElement | null>(null);
   const inst = useRef<Sinapses | null>(null);
   const latest = useRef(props);
@@ -88,6 +97,14 @@ export function SinapsesCanvas(props: SinapsesCanvasProps): ReactElement {
       nodes[l.from] = a;
       nodes[l.to] = b;
       usable.push({ ...l, state: p.states?.[l.id] ?? l.state });
+    }
+    // obstáculos só valem se houver alguma ligação (sem ligação, não há o que desviar)
+    if (usable.length) {
+      for (const id of p.obstacles ?? []) {
+        if (id in nodes) continue;
+        const v = resolve(p.nodes, id);
+        if (v) nodes[id] = v;
+      }
     }
     const s = createSinapses(canvas, { nodes, links: usable, config: p.config, worker: p.worker, manual: !!p.still });
     inst.current = s;

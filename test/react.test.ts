@@ -60,6 +60,8 @@ describe("structureKey", () => {
     expect(structureKey(LINKS, { config: { nmul: 2 } })).not.toBe(k);
     expect(structureKey(LINKS, { config: { glo: 2 } })).toBe(k);
     expect(structureKey(LINKS, { still: true })).not.toBe(k);
+    expect(structureKey(LINKS, { obstacles: ["x", "y"] })).toBe(structureKey(LINKS, { obstacles: ["y", "x", "x"] }));
+    expect(structureKey(LINKS, { obstacles: ["x"] })).not.toBe(k);
   });
 });
 
@@ -72,6 +74,13 @@ describe("SinapsesCanvas", () => {
     expect(Object.keys(made[0].opts.nodes).sort()).toEqual(["a", "b"]);
     expect(container.querySelector("[data-sinapses] > canvas")).toBe(made[0].canvas);
     expect(made[0].canvas.getAttribute("aria-hidden")).toBe("true");
+  });
+
+  it("adds resolvable obstacles as nodes (the strands go around them), never as link ends", () => {
+    const nodes = { a: el("a"), b: el("b"), x: el("x") };
+    render(createElement(SinapsesCanvas, { nodes, links: LINKS, obstacles: ["x", "gone", "a"] }));
+    expect(Object.keys(made[0].opts.nodes).sort()).toEqual(["a", "b", "x"]);
+    expect(made[0].opts.links.map((l) => l.id)).toEqual(["a-b"]);
   });
 
   it("resolves nodes through a function after mount", () => {
