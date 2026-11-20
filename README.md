@@ -7,7 +7,7 @@ Fios animados que ligam os nós de uma interface e mostram, pelo movimento, o es
 
 ## Estado e requisitos
 
-Em uso pessoal, ainda sem publicação. Requer Node 22.12 ou mais novo (o CI usa o 24) e npm; a verificação inclui Vitest 5 e jsdom 31, que não rodam no Node 20.
+Em uso pessoal. Publicado como pacote privado `@brno01/sinapses` no GitHub Packages a cada tag `v*`. Requer Node 22.12 ou mais novo (o CI usa o 24) e npm; a verificação inclui Vitest 5 e jsdom 31, que não rodam no Node 20.
 
 ## Demo
 
@@ -20,10 +20,21 @@ A demo tem quatro nós genéricos (API, Worker, Chat, Banco), botões para cada 
 
 ## Usar num projeto
 
+O pacote é publicado como `@brno01/sinapses` no GitHub Packages, que é privado: para instalar, o projeto precisa de um token com o escopo `read:packages`. No `.npmrc` do projeto:
+
+```
+@brno01:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
+```
+
+```bash
+npm install @brno01/sinapses
+```
+
 O pacote exporta o código-fonte TypeScript (`src/index.ts`); um projeto com Vite importa direto.
 
 ```ts
-import { createSinapses } from "sinapses";
+import { createSinapses } from "@brno01/sinapses";
 
 const s = createSinapses(canvas, {
   nodes: { api: elApi, worker: elWorker },        // elementos (medidos a cada quadro) ou retângulos
@@ -43,10 +54,10 @@ s.destroy();
 
 O canvas deve cobrir a área dos nós (as posições são relativas a ele). Com `worker: false`, tudo roda na thread principal; sem suporte a `OffscreenCanvas`, isso acontece sozinho. `s.mode` diz onde está rodando.
 
-### Em React (`sinapses/react`)
+### Em React (`@brno01/sinapses/react`)
 
 ```ts
-import { SinapsesCanvas } from "sinapses/react";
+import { SinapsesCanvas } from "@brno01/sinapses/react";
 
 <SinapsesCanvas
   className="camada"                       // a caixa ocupa o espaço que o estilo der; o canvas a preenche
