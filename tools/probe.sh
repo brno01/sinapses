@@ -14,6 +14,7 @@ T=$(mktemp -d); trap 'rm -rf "$T"' EXIT
 python3 -I "$ROOT/tools/harness.py" "$demo" "$T/a.html"
 if [ -n "$cfg" ]; then python3 -I "$ROOT/tools/probes/config.py" "$T/a.html" "$T/a.html" "$cfg"; fi
 python3 -I "$ROOT/tools/probes/$probe" "$T/a.html" "$T/b.html"
+# shellcheck disable=SC2054  # a vírgula em --window-size=1440,900 faz parte do argumento do Chrome, não separa elementos
 run=("$CH" --headless --disable-gpu --window-size=1440,900 --dump-dom "file://$T/b.html#$hash")
 if [ -n "${CORES:-}" ]; then run=(taskset -c "$CORES" "${run[@]}"); fi
 "${run[@]}" 2>/dev/null | grep -o '<pre id="mt">.*</pre>' | sed -e 's/^<pre id="mt">//' -e 's/<\/pre>$//'

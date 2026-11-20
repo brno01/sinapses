@@ -1,6 +1,13 @@
 # Sinapses
 
+[![ci](https://github.com/brno01/sinapses/actions/workflows/ci.yml/badge.svg)](https://github.com/brno01/sinapses/actions/workflows/ci.yml)
+[![security](https://github.com/brno01/sinapses/actions/workflows/security.yml/badge.svg)](https://github.com/brno01/sinapses/actions/workflows/security.yml)
+
 Fios animados que ligam os nós de uma interface e mostram, pelo movimento, o estado de cada ligação. Cada ligação é um feixe de fios finos; cada fio tem física própria, então o feixe parece vivo sem ficar barulhento. Tudo é desenhado num `<canvas>` 2D, sem dependências em tempo de execução, e a física e o desenho rodam num Web Worker para não disputar a thread principal com a interface.
+
+## Estado e requisitos
+
+Em uso pessoal, ainda sem publicação. Requer Node 22.12 ou mais novo (o CI usa o 24) e npm; a verificação inclui Vitest 5 e jsdom 31, que não rodam no Node 20.
 
 ## Demo
 
@@ -114,13 +121,20 @@ Presets: **Padrão** (76 fios na demo) e **Muitos fios · 60 fps** (106 fios).
 ## Verificação
 
 ```bash
+npm ci
 npm run typecheck
 npm run types         # regenera types/ depois de mudar a API
 npm test               # componente React, tipos publicados, com a demo original (15 cenários) e comportamento (dobras, ondulação, quebra, arraste, independência)
 npm run check:demo     # demo nova num Chrome headless: 11 estados sem erro, 60/30 fps, janela de ajustes, Worker de verdade
 npm run check:legacy   # demo original: a mesma bateria de sondas (~2 min)
 npm run fixtures       # regenera as assinaturas da demo original usadas na paridade
+npm run build          # typecheck e build da demo
 ```
+
+No GitHub, todo PR e todo push na `master` rodam três workflows:
+- `ci`: `npm ci`, `npm run typecheck`, `npm test` e `npm run build`, no Node 24. As checagens de navegador (`check:demo`, `check:legacy`) ficam de fora: precisam de Chrome e do Playwright.
+- `security`: segredos, dependências vulneráveis, análise estática, shellcheck e os próprios workflows. Uma falha na `master` abre uma issue `security-scan`.
+- `claude`: revisor sob demanda; comente `@claude` num PR ou numa issue, ou rode o workflow à mão para uma auditoria que abre issues. Só o dono do repositório consegue acioná-lo.
 
 As checagens de navegador usam um Chrome ou Chromium headless: o headless shell do Playwright em `~/.cache/ms-playwright` é encontrado sozinho; em outro lugar, defina `CHROME`. A checagem do Worker usa o Playwright para Python via `uv`.
 
@@ -146,4 +160,4 @@ No teste, ~70% do custo é desenho. Com o Worker, esse custo sai da thread princ
 
 ## Licença
 
-A definir.
+Repositório privado, todos os direitos reservados. Veja [LICENSE](LICENSE).

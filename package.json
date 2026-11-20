@@ -2,6 +2,7 @@
   "name": "sinapses",
   "version": "0.1.0",
   "private": true,
+  "license": "UNLICENSED",
   "type": "module",
   "description": "Animated canvas strands that connect interface nodes and show each link state",
   "exports": {
