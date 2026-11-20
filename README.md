@@ -171,4 +171,4 @@ No teste, ~70% do custo é desenho. Com o Worker, esse custo sai da thread princ
 
 ## Licença
 
-Repositório privado, todos os direitos reservados. Veja [LICENSE](LICENSE).
+[MIT](LICENSE)
